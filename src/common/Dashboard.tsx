@@ -25,7 +25,7 @@ import {
     Info,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import Reviews, { type Review } from '../Reviews';
+
 import {
     ComplaintsSection,
     MenuUploadSection as ExternalMenuUploadSection,
@@ -35,6 +35,8 @@ import type {
     ComplaintItem,
     ComplaintStatus
 } from '../restaurents/restaurant.types';
+import Reviews from '../features/restuarant/Reviews';
+import OwnerHeader from '../hotelcomponents/Header';
 
 
 // ============================================================================
@@ -491,136 +493,14 @@ const Header: React.FC<HeaderProps> = ({
     };
 
     return (
-        <header className="sticky top-0 z-40 bg-slate-900 text-white border-b border-slate-800 shadow-lg">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
-                {/* Brand Logo & Portal Title */}
-                <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl ${theme.bgClass} flex items-center justify-center shadow-md shrink-0 transition-colors`}>
-                        <Crown className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                        <div className="flex items-center gap-2">
-                            <span className="font-serif font-bold text-lg sm:text-xl tracking-tight text-white">
-                                Grand Horizon
-                            </span>
-                            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold uppercase tracking-wider bg-slate-800 text-amber-400 border border-slate-700">
-                                Owner Portal
-                            </span>
-                        </div>
-                        <p className="text-[11px] text-slate-400 hidden md:block">
-                            Hospitality &amp; Dining Command Center
-                        </p>
-                    </div>
-                </div>
-
-                {/* Right Controls: Live Status Toggle, Notification Bell, Owner Profile */}
-                <div className="flex items-center gap-2 sm:gap-4">
-                    {/* Interactive Open / Closed Status Pill */}
-                    <button
-                        type="button"
-                        onClick={onToggleBusinessStatus}
-                        title="Click to toggle restaurant live status"
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer ${isBusinessOpen
-                                ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300 hover:bg-emerald-500/25'
-                                : 'bg-rose-500/15 border-rose-500/30 text-rose-300 hover:bg-rose-500/25'
-                            }`}
-                    >
-                        <span
-                            className={`w-2 h-2 rounded-full ${isBusinessOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-                                }`}
-                        />
-                        <span className="hidden sm:inline">
-                            {isBusinessOpen ? 'Open for Dining' : 'Temporarily Closed'}
-                        </span>
-                        <span className="sm:hidden">{isBusinessOpen ? 'Open' : 'Closed'}</span>
-                    </button>
-
-                    {/* Notification Bell & Popover */}
-                    <div className="relative" ref={dropdownRef}>
-                        <button
-                            type="button"
-                            onClick={() => setNotifOpen((prev) => !prev)}
-                            aria-label="Notifications"
-                            className="relative p-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-800 text-slate-200 hover:text-white border border-slate-700/80 transition focus:outline-none cursor-pointer"
-                        >
-                            <Bell className="w-5 h-5" />
-                            {unreadCount > 0 && (
-                                <span className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-rose-500 text-white text-[11px] font-bold flex items-center justify-center shadow-sm ring-2 ring-slate-900">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
-
-                        {notifOpen && (
-                            <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200/90 text-slate-800 overflow-hidden z-50">
-                                <div className="px-4 py-3.5 bg-slate-900 text-white flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4 text-amber-400" />
-                                        <h3 className="text-sm font-semibold">Notifications</h3>
-                                        <span className="text-xs bg-slate-800 text-amber-300 px-2 py-0.5 rounded-full font-medium">
-                                            {unreadCount > 0 ? `${unreadCount} new` : 'All caught up'}
-                                        </span>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={onMarkAllRead}
-                                        className="text-xs text-amber-400 hover:text-amber-300 font-medium underline underline-offset-2 transition cursor-pointer"
-                                    >
-                                        Mark all as read
-                                    </button>
-                                </div>
-
-                                <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
-                                    {notifications.map((item) => (
-                                        <div
-                                            key={item.id}
-                                            onClick={() => onMarkSingleRead(item.id)}
-                                            className={`p-3.5 flex items-start gap-3 hover:bg-slate-50 transition cursor-pointer ${item.unread ? 'bg-amber-50/40' : ''
-                                                }`}
-                                        >
-                                            {renderNotifIcon(item.type)}
-                                            <div className="flex-1 min-w-0">
-                                                <div className="flex items-center justify-between gap-2">
-                                                    <p className="text-xs font-semibold text-slate-900 truncate">
-                                                        {item.title}
-                                                    </p>
-                                                    {item.unread && (
-                                                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
-                                                    )}
-                                                </div>
-                                                <p className="text-[11px] text-slate-600 mt-0.5 leading-relaxed">
-                                                    {item.message}
-                                                </p>
-                                                <p className="text-[10px] text-slate-400 mt-1">{item.time}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-center">
-                                    <span className="text-xs text-slate-500">
-                                        Real-time alerts for Grand Horizon Hospitality
-                                    </span>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Owner Profile Chip */}
-                    <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-800">
-                        <img
-                            src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&q=80"
-                            alt="Vikram Singhania"
-                            className="w-9 h-9 rounded-full object-cover ring-2 ring-amber-500/70"
-                        />
-                        <div className="hidden lg:block text-left">
-                            <p className="text-xs font-semibold text-white leading-tight">Vikram Singhania</p>
-                            <p className="text-[11px] text-slate-400">Managing Director</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </header>
+        <OwnerHeader
+        isBusinessOpen={isBusinessOpen}
+        onToggleBusinessStatus={onToggleBusinessStatus}
+        notifications={notifications}
+        onMarkSingleRead={onMarkSingleRead}
+        onMarkAllRead={onMarkAllRead}
+        theme={theme}
+    />
     );
 };
 
@@ -672,7 +552,7 @@ const CoverBanner: React.FC<CoverBannerProps> = ({
                     alt="Business Cover Photo"
                     className="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/55 to-slate-950/20" />
+                <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/55 to-slate-950/20" />
 
                 {/* Top-Right Cover Photo Actions */}
                 <div className="absolute top-4 right-4 sm:top-6 sm:right-6 flex flex-wrap items-center gap-2 z-20">

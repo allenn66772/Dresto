@@ -7,6 +7,8 @@ import AuthCard from './logins/AuthCard'
 import Dashboard from './common/Dashboard'
 import HotelOwnerAuthCard from './logins/HotelOwnerAuthCard'
 import RestaurantProfile from './features/restuarant/RestuarentProfile'
+import ProtectedRoute from './ProtectedRoute'
+import Selectplan from './hotelcomponents/Selectplan'
 // import AuthCard from './app/AuthCard'
 
 function App() {
@@ -19,9 +21,12 @@ function App() {
         <Route path='/owner/login' element={<HotelOwnerAuthCard />} />
         <Route path='/owner/register' element={<HotelOwnerAuthCard />} />
         <Route path='/login' element={<AuthCard />} />
-        <Route path='/owner/dashboard' element={<Dashboard />} />
+        <Route element={<ProtectedRoute allowedRoles={["owner"]} />}>
+          <Route path="/owner/dashboard" element={<Dashboard />} />
+        </Route>
         <Route path='/restaurent-profile' element={<RestaurantProfile />} />
         <Route path='/create-profile' element={<AddProfile />} />
+        <Route path='/select-plan' element={<Selectplan/>}/>
       </Routes>
     </>
   )

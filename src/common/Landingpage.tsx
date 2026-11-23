@@ -13,6 +13,7 @@ import {
     ChefHat,
     Star,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 type AudienceTab = "restaurants" | "foodies";
 
@@ -132,14 +133,16 @@ export default function LandingPage() {
                             custom={0.3}
                             className="flex flex-wrap items-center gap-4 pt-2"
                         >
-                            <motion.button
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="px-7 py-4 rounded-full bg-[#C48A5A] text-[#FAF6F0] font-semibold text-base flex items-center gap-2 shadow-lg shadow-[#C48A5A]/25 hover:bg-[#b37949] transition-colors"
-                            >
-                                Launch Your Restaurant
-                                <ArrowRight className="w-4 h-4" />
-                            </motion.button>
+                            <Link to="/owner/register">
+                                <motion.button
+                                    whileHover={{ scale: 1.03 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    className="px-7 py-4 rounded-full bg-[#C48A5A] text-[#FAF6F0] font-semibold text-base flex items-center gap-2 shadow-lg shadow-[#C48A5A]/25 hover:bg-[#b37949] transition-colors"
+                                >
+                                    Launch Your Restaurant
+                                    <ArrowRight className="w-4 h-4" />
+                                </motion.button>
+                            </Link>
 
                             <motion.button
                                 whileHover={{ scale: 1.03 }}
