@@ -136,13 +136,13 @@ export default function HotelOwnerAuthCard() {
 
     return (
         <div className="min-h-screen bg-[#FAF6F0] flex items-center justify-center p-4 sm:p-6 font-sans">
-            <div className="relative w-full max-w-5xl min-h-[680px] bg-[#FAF6F0] rounded-[2.5rem] shadow-2xl overflow-hidden border border-[#6B4A3A]/45 flex">
+            <div className="relative w-full max-w-5xl min-h-[680px] bg-[#FAF6F0] rounded-[2.5rem] shadow-2xl overflow-hidden border border-[#8dd6a4]/45 flex">
                 {/* BRANDING PANEL (Desktop only) */}
                 <motion.div
                     initial={false}
                     animate={{ x: isRegister ? "100%" : "0%" }}
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="hidden md:flex absolute top-0 bottom-0 left-0 w-1/2 rounded-[2.5rem] overflow-hidden text-[#FAF6F0] z-20 p-10 lg:p-12 flex-col justify-between bg-gradient-to-br from-[#2B1D17] to-[#1a110e] shadow-2xl"
+                    className="hidden md:flex absolute top-0 bottom-0 left-0 w-1/2 rounded-[2.5rem] overflow-hidden text-[#FAF6F0] z-20 p-10 lg:p-12 flex-col justify-between bg-gradient-to-br from-[#206837] to-[#40793b] shadow-2xl"
                 >
                     <div className="absolute top-1/3 -left-20 w-64 h-64 bg-[#C48A5A]/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -164,12 +164,12 @@ export default function HotelOwnerAuthCard() {
                                     {isRegister ? (
                                         <>
                                             List your hotel <br />
-                                            <span className="text-[#C48A5A]">in minutes</span>
+                                            <span className="text-[#5E6B23]">in minutes</span>
                                         </>
                                     ) : (
                                         <>
                                             Run your hotel <br />
-                                            <span className="text-[#C48A5A]">with ease</span>
+                                            <span className="text-[#ffffff]">with ease</span>
                                         </>
                                     )}
                                 </h1>
@@ -196,7 +196,7 @@ export default function HotelOwnerAuthCard() {
                     initial={false}
                     animate={{ x: isRegister ? "-100%" : "0%" }}
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                    className="w-full md:w-1/2 md:ml-[50%] max-md:!transform-none bg-[#FAF6F0] text-[#2B1D17] z-10 p-6 sm:p-10 flex flex-col justify-between"
+                    className="w-full md:w-1/2 md:ml-[50%] max-md:!transform-none bg-[#FAF6F0] text-[#5E6B23] z-10 p-6 sm:p-10 flex flex-col justify-between"
                 >
                     {/* HEADER */}
                     <div className="flex items-center justify-between">

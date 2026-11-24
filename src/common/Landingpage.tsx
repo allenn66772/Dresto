@@ -1,456 +1,317 @@
-import { useState } from "react";
-// import { motion, AnimatePresence } from "framer-motion";
-import { motion, AnimatePresence, type Variants } from "framer-motion";
+import React from 'react';
 import {
-    UtensilsCrossed,
-    Sparkles,
-    TrendingUp,
-    MapPin,
-    QrCode,
+    ChevronDown,
+    CreditCard,
+    Package,
+    Users,
     Heart,
-    ArrowRight,
+    TrendingUp,
     CheckCircle2,
-    ChefHat,
-    Star,
-} from "lucide-react";
-import { Link } from "react-router-dom";
+    Clock,
+    Utensils,
+} from 'lucide-react';
 
-type AudienceTab = "restaurants" | "foodies";
-
-export default function LandingPage() {
-
-
-    const [activeTab, setActiveTab] = useState<AudienceTab>("restaurants");
-
-    const fadeUp: Variants = {
-        hidden: { opacity: 0, y: 24 },
-        visible: (delay: number = 0) => ({
-            opacity: 1,
-            y: 0,
-            transition: {
-                duration: 0.6,
-                delay,
-                ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
-            },
-        }),
-    };
-
+export default function Landingpage() {
     return (
-        <div className="min-h-screen bg-[#FAF6F0] text-[#2B1D17] font-sans selection:bg-[#C48A5A] selection:text-[#FAF6F0] overflow-x-hidden">
-            {/* NAVBAR */}
-            <motion.header
-                initial={{ y: -20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="sticky top-0 z-50 backdrop-blur-md bg-[#FAF6F0]/85 border-b border-[#E7D6C1]"
-            >
-                <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-10 h-10 rounded-xl bg-[#2B1D17] flex items-center justify-center text-[#C48A5A] shadow-md">
-                            <UtensilsCrossed className="w-5 h-5" />
+        <div className="min-h-screen bg-white text-slate-900 font-sans antialiased selection:bg-teal-100 selection:text-teal-900">
+            {/* Navigation Bar */}
+            
+
+            {/* Hero Section */}
+            <section className="relative overflow-hidden bg-gradient-to-b from-[#f3f8f7] to-white pt-16 pb-24 lg:pt-24 lg:pb-32">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+                        {/* Left Copy Column */}
+                        <div className="lg:col-span-5 space-y-8">
+                            <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold tracking-tight text-slate-900 leading-[1.12]">
+                                The All-in-One Operating System for Modern Restaurants.
+                            </h1>
+
+                            <p className="text-base sm:text-lg text-slate-600 leading-relaxed">
+                                Streamline reservations, POS, staff scheduling, inventory, and
+                                online ordering—all in one powerful platform built for
+                                restaurants, cafes, and multi-location dining.
+                            </p>
+
+                            {/* CTA Buttons */}
+                            <div className="flex flex-wrap items-center gap-4">
+                                <button className="px-7 py-3.5 text-sm font-semibold text-white bg-[#148873] rounded-full hover:bg-[#10705e] shadow-md shadow-teal-900/10 transition-all">
+                                    Get Started Free
+                                </button>
+                                <button className="px-7 py-3.5 text-sm font-semibold text-slate-700 bg-white border border-slate-200 rounded-full hover:bg-slate-50 shadow-sm transition-all">
+                                    Watch 2-Min Demo
+                                </button>
+                            </div>
+
+                            {/* Social Proof */}
+                            <div className="pt-4 space-y-4">
+                                <p className="text-xs font-medium text-slate-500">
+                                    Trusted by 4,500+ restaurants worldwide
+                                </p>
+                                <div className="flex flex-wrap items-center gap-6 text-slate-400 grayscale opacity-75">
+                                    <span className="font-serif italic font-bold text-sm">Bistro & Co</span>
+                                    <span className="font-mono font-bold text-sm tracking-wider">THE OAK</span>
+                                    <span className="font-sans font-extrabold text-sm">Delica</span>
+                                    <span className="font-serif font-semibold text-sm">Saffron</span>
+                                    <span className="font-sans font-bold text-xs uppercase tracking-widest">
+                                        Urban Grill
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <span className="text-xl font-bold tracking-tight text-[#2B1D17]">
-                            Dres<span className="text-[#C48A5A]">to</span>
-                        </span>
-                    </div>
 
-                    <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-[#6B4A3A]">
-                        <a href="#features" className="hover:text-[#2B1D17] transition-colors">
-                            Platform
-                        </a>
-                        <a href="#experience" className="hover:text-[#2B1D17] transition-colors">
-                            Dual Experience
-                        </a>
-                        <a href="#pricing" className="hover:text-[#2B1D17] transition-colors">
-                            Pricing
-                        </a>
-                    </nav>
+                        {/* Right Device Mockups Column */}
+                        <div className="lg:col-span-7 relative">
+                            {/* Decorative Background Shapes */}
+                            <div className="hidden sm:block absolute -top-6 -right-4 w-40 h-40 bg-[#148873] rounded-3xl -z-0" />
+                            <div className="hidden sm:block absolute -bottom-6 left-10 w-32 h-24 bg-amber-400 rounded-2xl -z-0" />
 
-                    <div className="flex items-center gap-3">
-                        <button className="hidden sm:inline-block px-4 py-2 text-sm font-semibold text-[#6B4A3A] hover:text-[#2B1D17] transition-colors">
-                            Sign In
-                        </button>
-                        <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                            className="px-5 py-2.5 rounded-full bg-[#2B1D17] text-[#FAF6F0] text-sm font-semibold hover:bg-[#6B4A3A] transition-colors shadow-sm"
-                        >
-                            Get Started
-                        </motion.button>
-                    </div>
-                </div>
-            </motion.header>
+                            {/* Laptop Frame */}
+                            <div className="relative z-10 bg-slate-900 rounded-2xl p-2.5 shadow-2xl border border-slate-800">
+                                <div className="bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+                                    {/* Mock App Header */}
+                                    <div className="bg-white border-b border-slate-100 px-4 py-2.5 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-5 h-5 rounded bg-[#148873] text-white text-xs font-bold flex items-center justify-center">
+                                                D
+                                            </div>
+                                            <span className="font-bold text-xs text-slate-800">Dresto</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="px-2.5 py-1 bg-[#148873] text-white text-[10px] font-medium rounded-md">
+                                                + New Order
+                                            </span>
+                                        </div>
+                                    </div>
 
-            {/* HERO SECTION */}
-            <section className="relative pt-16 pb-24 lg:pt-24 lg:pb-32 px-6">
-                {/* Subtle Warm Glow Background */}
-                <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-[#E7D6C1]/60 rounded-full blur-3xl -z-10 pointer-events-none" />
+                                    {/* Mock Dashboard Body */}
+                                    <div className="grid grid-cols-12 min-h-[310px]">
+                                        {/* Sidebar */}
+                                        <div className="col-span-3 bg-white border-r border-slate-100 p-3 space-y-2 hidden sm:block">
+                                            <div className="px-2.5 py-1.5 rounded-md bg-teal-50 text-[#148873] text-xs font-semibold">
+                                                Dashboard
+                                            </div>
+                                            {['Orders', 'Tables', 'Reservations', 'Inventory', 'Staff', 'Reports'].map(
+                                                (item) => (
+                                                    <div
+                                                        key={item}
+                                                        className="px-2.5 py-1.5 text-xs text-slate-500 hover:text-slate-800"
+                                                    >
+                                                        {item}
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
 
-                <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
-                    {/* Left Copy */}
-                    <div className="lg:col-span-7 space-y-7">
-                        <motion.div
-                            variants={fadeUp}
-                            initial="hidden"
-                            animate="visible"
-                            custom={0}
-                            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E7D6C1]/70 border border-[#C48A5A]/30 text-[#6B4A3A] text-xs font-semibold uppercase tracking-wider"
-                        >
-                            <Sparkles className="w-3.5 h-3.5 text-[#C48A5A]" />
-                            Where Kitchens Meet Cravings
-                        </motion.div>
+                                        {/* Main Metrics Area */}
+                                        <div className="col-span-12 sm:col-span-9 p-4 space-y-4">
+                                            <div className="flex items-center justify-between">
+                                                <h3 className="text-sm font-bold text-slate-800">Dashboard</h3>
+                                                <span className="text-[11px] text-slate-400">Today, Live View</span>
+                                            </div>
 
-                        <motion.h1
-                            variants={fadeUp}
-                            initial="hidden"
-                            animate="visible"
-                            custom={0.1}
-                            className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-[#2B1D17] leading-[1.1]"
-                        >
-                            One Smart Table for{" "}
-                            <span className="text-[#C48A5A]">Restaurants</span> &amp;{" "}
-                            <span className="underline decoration-[#E7D6C1] decoration-8 underline-offset-4">
-                                Foodies.
-                            </span>
-                        </motion.h1>
+                                            {/* KPI Cards */}
+                                            <div className="grid grid-cols-3 gap-3">
+                                                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-xs">
+                                                    <p className="text-[10px] text-slate-400 font-medium">Live Revenue</p>
+                                                    <p className="text-base font-bold text-slate-900 mt-0.5">$3,500</p>
+                                                    <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-600 font-medium mt-1">
+                                                        <TrendingUp className="w-3 h-3" /> +14.2%
+                                                    </span>
+                                                </div>
 
-                        <motion.p
-                            variants={fadeUp}
-                            initial="hidden"
-                            animate="visible"
-                            custom={0.2}
-                            className="text-lg text-[#6B4A3A] max-w-xl leading-relaxed"
-                        >
-                            Streamline table turns, AI menu engineering, and instant QR ordering for
-                            hospitality teams—while giving diners personalized dish discovery and
-                            effortless loyalty rewards.
-                        </motion.p>
+                                                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-xs">
+                                                    <p className="text-[10px] text-slate-400 font-medium">Tables Occupied</p>
+                                                    <p className="text-base font-bold text-slate-900 mt-0.5">84%</p>
+                                                    <div className="w-full bg-slate-100 h-1.5 rounded-full mt-2 overflow-hidden">
+                                                        <div className="bg-[#148873] h-full w-[84%] rounded-full" />
+                                                    </div>
+                                                </div>
 
-                        <motion.div
-                            variants={fadeUp}
-                            initial="hidden"
-                            animate="visible"
-                            custom={0.3}
-                            className="flex flex-wrap items-center gap-4 pt-2"
-                        >
-                            <Link to="/owner/register">
-                                <motion.button
-                                    whileHover={{ scale: 1.03 }}
-                                    whileTap={{ scale: 0.97 }}
-                                    className="px-7 py-4 rounded-full bg-[#C48A5A] text-[#FAF6F0] font-semibold text-base flex items-center gap-2 shadow-lg shadow-[#C48A5A]/25 hover:bg-[#b37949] transition-colors"
-                                >
-                                    Launch Your Restaurant
-                                    <ArrowRight className="w-4 h-4" />
-                                </motion.button>
-                            </Link>
+                                                <div className="bg-white p-3 rounded-lg border border-slate-100 shadow-xs">
+                                                    <p className="text-[10px] text-slate-400 font-medium">Active Orders</p>
+                                                    <p className="text-base font-bold text-slate-900 mt-0.5">28</p>
+                                                    <span className="text-[10px] text-amber-600 font-medium mt-1 block">
+                                                        6 in prep
+                                                    </span>
+                                                </div>
+                                            </div>
 
-                            <motion.button
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="px-7 py-4 rounded-full bg-[#E7D6C1] text-[#2B1D17] font-semibold text-base hover:bg-[#dcc6ab] transition-colors"
-                            >
-                                Explore Foodie App
-                            </motion.button>
-                        </motion.div>
-
-                        {/* Social Proof */}
-                        <motion.div
-                            variants={fadeUp}
-                            initial="hidden"
-                            animate="visible"
-                            custom={0.4}
-                            className="pt-4 flex items-center gap-6 text-sm text-[#6B4A3A]"
-                        >
-                            <div className="flex items-center gap-1 text-[#C48A5A]">
-                                {[...Array(5)].map((_, i) => (
-                                    <Star key={i} className="w-4 h-4 fill-current" />
-                                ))}
-                            </div>
-                            <span>
-                                Trusted by <strong className="text-[#2B1D17]">1,400+</strong> cafés,
-                                bistros &amp; <strong className="text-[#2B1D17]">85k</strong> diners
-                            </span>
-                        </motion.div>
-                    </div>
-
-                    {/* Right Interactive Floating Dashboard Mockup */}
-                    <div className="lg:col-span-5 relative">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.92 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 0.7, delay: 0.2 }}
-                            className="relative bg-[#2B1D17] text-[#FAF6F0] rounded-3xl p-6 shadow-2xl border border-[#6B4A3A]/50"
-                        >
-                            {/* Top Card Header */}
-                            <div className="flex items-center justify-between pb-5 border-b border-[#6B4A3A]/40">
-                                <div>
-                                    <p className="text-xs text-[#E7D6C1]/70 uppercase tracking-wider">
-                                        Live Service Pulse
-                                    </p>
-                                    <h3 className="text-lg font-bold text-[#FAF6F0]">
-                                        Roast &amp; Rye Kitchen
-                                    </h3>
-                                </div>
-                                <span className="px-3 py-1 rounded-full bg-[#C48A5A]/20 text-[#C48A5A] text-xs font-semibold flex items-center gap-1.5">
-                                    <span className="w-2 h-2 rounded-full bg-[#C48A5A] animate-pulse" />
-                                    Peak Hour
-                                </span>
-                            </div>
-
-                            {/* Metrics Grid */}
-                            <div className="grid grid-cols-2 gap-4 my-5">
-                                <div className="p-4 rounded-2xl bg-[#6B4A3A]/30 border border-[#6B4A3A]/40">
-                                    <p className="text-xs text-[#E7D6C1]">Tonight&apos;s Revenue</p>
-                                    <p className="text-2xl font-bold text-[#FAF6F0] mt-1">₹1,48,900</p>
-                                    <span className="text-xs text-[#C48A5A] font-medium">
-                                        +18.4% vs last Fri
-                                    </span>
-                                </div>
-                                <div className="p-4 rounded-2xl bg-[#6B4A3A]/30 border border-[#6B4A3A]/40">
-                                    <p className="text-xs text-[#E7D6C1]">Avg Table Turn</p>
-                                    <p className="text-2xl font-bold text-[#FAF6F0] mt-1">42 mins</p>
-                                    <span className="text-xs text-[#C48A5A] font-medium">
-                                        94% occupancy
-                                    </span>
+                                            {/* Floor / Schedule Preview */}
+                                            <div className="bg-white p-3.5 rounded-lg border border-slate-100 shadow-xs space-y-2.5">
+                                                <div className="flex items-center justify-between">
+                                                    <span className="text-xs font-semibold text-slate-700">
+                                                        Upcoming Reservations
+                                                    </span>
+                                                    <span className="text-[10px] px-2 py-0.5 bg-teal-50 text-[#148873] rounded font-medium">
+                                                        Evening Shift
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2 text-[11px]">
+                                                    <div className="p-2 rounded bg-teal-50/70 border border-teal-100">
+                                                        <p className="font-semibold text-slate-800">Table 04 • 4 Guests</p>
+                                                        <p className="text-slate-500 text-[10px]">7:30 PM • Confirmed</p>
+                                                    </div>
+                                                    <div className="p-2 rounded bg-amber-50/70 border border-amber-100">
+                                                        <p className="font-semibold text-slate-800">Table 11 • 2 Guests</p>
+                                                        <p className="text-slate-500 text-[10px]">7:45 PM • VIP</p>
+                                                    </div>
+                                                    <div className="p-2 rounded bg-slate-50 border border-slate-100">
+                                                        <p className="font-semibold text-slate-800">Table 08 • 6 Guests</p>
+                                                        <p className="text-slate-500 text-[10px]">8:00 PM • Seated</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Trending Dish Pill */}
-                            <div className="p-4 rounded-2xl bg-[#E7D6C1] text-[#2B1D17] flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-[#2B1D17] text-[#C48A5A] flex items-center justify-center">
-                                        <ChefHat className="w-5 h-5" />
+                            {/* Floating Left Card: Kitchen Status */}
+                            <div className="hidden md:block absolute -left-8 bottom-8 z-20 w-56 bg-white rounded-xl p-3.5 shadow-xl border border-slate-100">
+                                <div className="flex items-center justify-between mb-2.5">
+                                    <span className="text-xs font-bold text-slate-800">Kitchen Queue</span>
+                                    <Utensils className="w-3.5 h-3.5 text-[#148873]" />
+                                </div>
+                                <div className="space-y-2.5 text-[11px]">
+                                    <div>
+                                        <div className="flex justify-between text-slate-600 mb-1">
+                                            <span>Dine-in Orders</span>
+                                            <span className="font-semibold">70%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="w-[70%] h-full bg-[#148873] rounded-full" />
+                                        </div>
                                     </div>
                                     <div>
-                                        <p className="text-xs font-semibold text-[#6B4A3A]">
-                                            #1 Foodie Craving Tonight
-                                        </p>
-                                        <p className="text-sm font-bold">
-                                            Smoked Caramel Cortado &amp; Brioche
-                                        </p>
+                                        <div className="flex justify-between text-slate-600 mb-1">
+                                            <span>Online Delivery</span>
+                                            <span className="font-semibold">20%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="w-[20%] h-full bg-amber-400 rounded-full" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-slate-600 mb-1">
+                                            <span>Takeaway</span>
+                                            <span className="font-semibold">10%</span>
+                                        </div>
+                                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="w-[10%] h-full bg-sky-400 rounded-full" />
+                                        </div>
                                     </div>
                                 </div>
-                                <span className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#C48A5A] text-[#FAF6F0]">
-                                    64 orders
-                                </span>
                             </div>
-                        </motion.div>
 
-                        {/* Floating Notification Badge */}
-                        <motion.div
-                            animate={{ y: [0, -8, 0] }}
-                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                            className="hidden sm:flex items-center gap-3 absolute -bottom-6 -left-6 bg-[#FAF6F0] border border-[#E7D6C1] px-4 py-3 rounded-2xl shadow-xl"
-                        >
-                            <div className="w-9 h-9 rounded-full bg-[#C48A5A]/20 text-[#C48A5A] flex items-center justify-center">
-                                <Heart className="w-4 h-4 fill-current" />
-                            </div>
-                            <div>
-                                <p className="text-xs font-bold text-[#2B1D17]">
-                                    Aarav redeemed 500 pts
-                                </p>
-                                <p className="text-[11px] text-[#6B4A3A]">
-                                    Free Tiramisu unlocked at Table 04
-                                </p>
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
-            </section>
-
-            {/* DUAL AUDIENCE TOGGLE SECTION */}
-            <section id="experience" className="py-24 px-6 bg-[#E7D6C1]/45 border-y border-[#E7D6C1]">
-                <div className="max-w-6xl mx-auto">
-                    <div className="text-center max-w-2xl mx-auto space-y-4">
-                        <h2 className="text-3xl sm:text-4xl font-bold text-[#2B1D17]">
-                            Built for Both Sides of the Pass
-                        </h2>
-                        <p className="text-[#6B4A3A]">
-                            Switch views to see how CraveOS powers kitchen operations and delights
-                            everyday food explorers.
-                        </p>
-
-                        {/* Interactive Pill Switch */}
-                        <div className="inline-flex p-1.5 rounded-full bg-[#E7D6C1] border border-[#C48A5A]/30 mt-4">
-                            {(["restaurants", "foodies"] as AudienceTab[]).map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`relative px-6 py-2.5 rounded-full text-sm font-semibold capitalize transition-colors ${activeTab === tab ? "text-[#FAF6F0]" : "text-[#6B4A3A]"
-                                        }`}
-                                >
-                                    {activeTab === tab && (
-                                        <motion.span
-                                            layoutId="audiencePill"
-                                            transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                                            className="absolute inset-0 rounded-full bg-[#2B1D17] -z-0"
-                                        />
-                                    )}
-                                    <span className="relative z-10">
-                                        For {tab === "restaurants" ? "Restaurants" : "Foodies"}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Animated Tab Content */}
-                    <div className="mt-14">
-                        <AnimatePresence mode="wait">
-                            {activeTab === "restaurants" ? (
-                                <motion.div
-                                    key="restaurants"
-                                    initial={{ opacity: 0, y: 16 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -16 }}
-                                    transition={{ duration: 0.35 }}
-                                    className="grid md:grid-cols-3 gap-6"
-                                >
-                                    {[
-                                        {
-                                            icon: QrCode,
-                                            title: "Zero-App QR Ordering",
-                                            desc: "Guests scan, customize spice or dietary notes, and split bills in 15 seconds—boosting average order value by 22%.",
-                                        },
-                                        {
-                                            icon: TrendingUp,
-                                            title: "AI Menu & Margin Insights",
-                                            desc: "Identify high-margin hero dishes and automatically spotlight slow-moving specials during off-peak hours.",
-                                        },
-                                        {
-                                            icon: ChefHat,
-                                            title: "Unified Kitchen Display",
-                                            desc: "Sync dine-in, takeaway, and direct delivery orders on one calm, color-coded screen with zero ticket chaos.",
-                                        },
-                                    ].map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="p-7 rounded-3xl bg-[#FAF6F0] border border-[#E7D6C1] shadow-sm hover:border-[#C48A5A] transition-colors"
-                                        >
-                                            <div className="w-12 h-12 rounded-2xl bg-[#2B1D17] text-[#C48A5A] flex items-center justify-center mb-5">
-                                                <item.icon className="w-6 h-6" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-[#2B1D17] mb-2">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-sm text-[#6B4A3A] leading-relaxed">
-                                                {item.desc}
-                                            </p>
+                            {/* Floating Right Mobile Mockup */}
+                            <div className="hidden sm:block absolute -right-4 -bottom-8 z-20 w-44 bg-slate-900 rounded-[26px] p-2 shadow-2xl border border-slate-800">
+                                <div className="bg-white rounded-[20px] overflow-hidden p-3 space-y-2.5">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[11px] font-bold text-slate-900">Dresto Mobile</span>
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                    </div>
+                                    <div className="h-16 rounded-lg bg-gradient-to-tr from-slate-800 to-slate-600 p-2 flex flex-col justify-end text-white">
+                                        <span className="text-[9px] uppercase tracking-wider opacity-80">
+                                            Main Dining
+                                        </span>
+                                        <span className="text-xs font-bold">14 Active Tables</span>
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <div className="flex items-center justify-between text-[10px] p-1.5 bg-slate-50 rounded">
+                                            <span className="font-medium text-slate-700 flex items-center gap-1">
+                                                <CheckCircle2 className="w-3 h-3 text-[#148873]" /> Order #204
+                                            </span>
+                                            <span className="font-bold text-slate-900">$64.00</span>
                                         </div>
-                                    ))}
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="foodies"
-                                    initial={{ opacity: 0, y: 16 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -16 }}
-                                    transition={{ duration: 0.35 }}
-                                    className="grid md:grid-cols-3 gap-6"
-                                >
-                                    {[
-                                        {
-                                            icon: MapPin,
-                                            title: "Craving-First Discovery",
-                                            desc: "Search by specific dish mood—like 'flaky sourdough' or 'authentic wood-fired'—curated by verified local foodies.",
-                                        },
-                                        {
-                                            icon: Heart,
-                                            title: "Universal Taste Passport",
-                                            desc: "Earn roasted-bean rewards across every partner café and bistro with a single unified wallet.",
-                                        },
-                                        {
-                                            icon: Sparkles,
-                                            title: "Live Waitlist & Table Drops",
-                                            desc: "Join queues remotely and get instant alerts when last-minute Friday night tables open up nearby.",
-                                        },
-                                    ].map((item, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="p-7 rounded-3xl bg-[#FAF6F0] border border-[#E7D6C1] shadow-sm hover:border-[#C48A5A] transition-colors"
-                                        >
-                                            <div className="w-12 h-12 rounded-2xl bg-[#C48A5A] text-[#FAF6F0] flex items-center justify-center mb-5">
-                                                <item.icon className="w-6 h-6" />
-                                            </div>
-                                            <h3 className="text-xl font-bold text-[#2B1D17] mb-2">
-                                                {item.title}
-                                            </h3>
-                                            <p className="text-sm text-[#6B4A3A] leading-relaxed">
-                                                {item.desc}
-                                            </p>
+                                        <div className="flex items-center justify-between text-[10px] p-1.5 bg-slate-50 rounded">
+                                            <span className="font-medium text-slate-700 flex items-center gap-1">
+                                                <Clock className="w-3 h-3 text-amber-500" /> Order #205
+                                            </span>
+                                            <span className="font-bold text-slate-900">$42.50</span>
                                         </div>
-                                    ))}
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                                    </div>
+                                    <button className="w-full py-1.5 bg-[#148873] text-white text-[10px] font-semibold rounded-lg">
+                                        Open POS
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* DARK ESPRESSO CTA BANNER */}
-            <section id="pricing" className="py-24 px-6">
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                    transition={{ duration: 0.6 }}
-                    className="max-w-5xl mx-auto rounded-[2.5rem] bg-[#2B1D17] text-[#FAF6F0] p-10 sm:p-16 relative overflow-hidden shadow-2xl"
-                >
-                    {/* Decorative Mocha & Caramel Orbs */}
-                    <div className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-[#6B4A3A]/40 blur-2xl pointer-events-none" />
-                    <div className="absolute -bottom-24 -left-24 w-72 h-72 rounded-full bg-[#C48A5A]/20 blur-2xl pointer-events-none" />
-
-                    <div className="relative z-10 max-w-2xl space-y-6">
-                        <span className="inline-block px-3.5 py-1 rounded-full bg-[#6B4A3A] text-[#E7D6C1] text-xs font-semibold tracking-wide uppercase">
-                            14-Day Free Trial • No Hardware Lock-in
-                        </span>
-                        <h2 className="text-3xl sm:text-5xl font-bold leading-tight">
-                            Ready to serve a warmer, smarter dining experience?
-                        </h2>
-                        <p className="text-[#E7D6C1]/85 text-base sm:text-lg">
-                            Set up your digital menu in under 10 minutes or download the CraveOS
-                            app to unlock hidden culinary gems in your city.
+            {/* Key Features Section */}
+            <section id="features" className="py-20 bg-white">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-2xl mx-auto mb-14">
+                        <p className="text-sm font-semibold text-[#148873] tracking-wide">
+                            Key Features
                         </p>
+                        <h2 className="mt-2 text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                            Everything you need to run a thriving restaurant
+                        </h2>
+                    </div>
 
-                        <div className="flex flex-wrap gap-4 pt-2">
-                            <motion.button
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="px-8 py-4 rounded-full bg-[#C48A5A] text-[#FAF6F0] font-bold text-base hover:bg-[#b37949] transition-colors shadow-lg"
-                            >
-                                Start Free Restaurant Trial
-                            </motion.button>
-                            <motion.button
-                                whileHover={{ scale: 1.03 }}
-                                whileTap={{ scale: 0.97 }}
-                                className="px-8 py-4 rounded-full border border-[#6B4A3A] text-[#E7D6C1] font-semibold text-base hover:bg-[#6B4A3A]/30 transition-colors"
-                            >
-                                Book a Live Demo
-                            </motion.button>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {/* Feature 1 */}
+                        <div className="p-6 rounded-2xl border border-slate-100 bg-white hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition-all">
+                            <div className="w-11 h-11 rounded-xl bg-teal-50 text-[#148873] flex items-center justify-center mb-5">
+                                <CreditCard className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 mb-2">
+                                Smart POS & Ordering
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                                Contactless tableside ordering, split billing, and instant kitchen
+                                ticket routing.
+                            </p>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-6 pt-4 text-xs text-[#E7D6C1]/80">
-                            <span className="flex items-center gap-1.5">
-                                <CheckCircle2 className="w-4 h-4 text-[#C48A5A]" /> Instant UPI &amp; Card Split-Pay
-                            </span>
-                            <span className="flex items-center gap-1.5">
-                                <CheckCircle2 className="w-4 h-4 text-[#C48A5A]" /> Zero Commission Direct Orders
-                            </span>
+                        {/* Feature 2 */}
+                        <div className="p-6 rounded-2xl border border-slate-100 bg-white hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition-all">
+                            <div className="w-11 h-11 rounded-xl bg-teal-50 text-[#148873] flex items-center justify-center mb-5">
+                                <Package className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 mb-2">
+                                Inventory & Cost Control
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                                Real-time stock tracking, automated vendor alerts, and
+                                ingredient-level recipe costing.
+                            </p>
+                        </div>
+
+                        {/* Feature 3 */}
+                        <div className="p-6 rounded-2xl border border-slate-100 bg-white hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition-all">
+                            <div className="w-11 h-11 rounded-xl bg-teal-50 text-[#148873] flex items-center justify-center mb-5">
+                                <Users className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 mb-2">
+                                Staff & Shift Management
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                                Drag-and-drop shift scheduling, PIN clock-ins, tip pooling, and
+                                automated payroll sync.
+                            </p>
+                        </div>
+
+                        {/* Feature 4 */}
+                        <div className="p-6 rounded-2xl border border-slate-100 bg-white hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5 transition-all">
+                            <div className="w-11 h-11 rounded-xl bg-teal-50 text-[#148873] flex items-center justify-center mb-5">
+                                <Heart className="w-5 h-5" />
+                            </div>
+                            <h3 className="text-base font-bold text-slate-900 mb-2">
+                                Customer Insights & Loyalty
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed">
+                                Built-in guest CRM, custom digital rewards, automated feedback
+                                loops, and repeat-visit campaigns.
+                            </p>
                         </div>
                     </div>
-                </motion.div>
-            </section>
-
-            {/* FOOTER */}
-            <footer className="border-t border-[#E7D6C1] py-10 px-6 text-sm text-[#6B4A3A]">
-                <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="flex items-center gap-2 font-bold text-[#2B1D17]">
-                        <UtensilsCrossed className="w-4 h-4 text-[#C48A5A]" />
-                        <span>CraveOS</span>
-                    </div>
-                    <p>© {new Date().getFullYear()} CraveOS Technologies. Brewed with warmth.</p>
                 </div>
-            </footer>
+            </section>
         </div>
     );
 }
