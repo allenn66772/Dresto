@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import SelectBranchModal from '../hotelcomponents/SelectBranchModal';
 import type { Branch } from '../hotelcomponents/SelectBranchModal';
+import { useRestaurantStore } from '../features/restuarant/restaurant.store';
+// import { log } from 'console';
 
 type AccentTheme = 'teal' | 'amber' | 'emerald' | 'rose' | 'indigo';
 
@@ -437,6 +439,16 @@ export default function Dashboard() {
 
     const theme = ACCENT_THEMES[profile.accentTheme] || ACCENT_THEMES.teal;
     const activeBranch = branches.find((b) => b.id === activeBranchId) || branches[0];
+
+
+    ///
+    // const restaurants=useRestaurantStore((s)=>s.restaurants);
+    const fetchRestaurants=useRestaurantStore((s)=>s.fetchRestaurants)
+
+    useEffect(()=>{
+        fetchRestaurants()
+        
+    },[fetchRestaurants])
 
     useEffect(() => {
         const handleOutside = (e: globalThis.MouseEvent) => {
