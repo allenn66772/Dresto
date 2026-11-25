@@ -1,17 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent, FormEvent } from 'react';
 import {
-    Sparkles,
-    Images,
     Camera,
     Star,
     MapPin,
     Clock,
     Phone,
     SlidersHorizontal,
-    Users,
     MessageSquareWarning,
-    BookOpenCheck,
     AlertCircle,
     Utensils,
     ImagePlus,
@@ -19,7 +15,6 @@ import {
     Check,
     CheckCircle2,
     Info,
-    TrendingUp,
     Bell,
     Plus,
     FileText,
@@ -27,8 +22,11 @@ import {
     UploadCloud,
     Send,
     LayoutDashboard,
+    Building2,
     Menu,
 } from 'lucide-react';
+import SelectBranchModal from '../hotelcomponents/SelectBranchModal';
+import type { Branch } from '../hotelcomponents/SelectBranchModal';
 
 type AccentTheme = 'teal' | 'amber' | 'emerald' | 'rose' | 'indigo';
 
@@ -101,7 +99,20 @@ interface ToastItem {
     type: 'success' | 'info';
 }
 
-const ACCENT_THEMES = {
+const ACCENT_THEMES: Record<
+    AccentTheme,
+    {
+        key: AccentTheme;
+        label: string;
+        swatchClass: string;
+        bgClass: string;
+        hoverBgClass: string;
+        textClass: string;
+        borderClass: string;
+        ringClass: string;
+        softBgClass: string;
+    }
+> = {
     teal: {
         key: 'teal',
         label: 'Dresto Teal',
@@ -179,6 +190,30 @@ const PRESET_COVERS = [
         label: 'Royal Suites',
         url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=85',
         thumb: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=400&q=70',
+    },
+];
+
+const INITIAL_BRANCHES: Branch[] = [
+    {
+        id: 1,
+        name: 'Marine Drive Flagship',
+        code: 'MUM-01',
+        location: '42 Marine Drive, South Mumbai',
+        isActive: true,
+    },
+    {
+        id: 2,
+        name: 'Bandra West Lounge',
+        code: 'MUM-02',
+        location: 'Linking Road, Bandra West',
+        isActive: true,
+    },
+    {
+        id: 3,
+        name: 'Lower Parel Courtyard',
+        code: 'MUM-03',
+        location: 'Senapati Bapat Marg, Lower Parel',
+        isActive: false,
     },
 ];
 
@@ -357,6 +392,11 @@ export default function Dashboard() {
     const [activeTab, setActiveTab] = useState('overview');
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
+    const [branches, setBranches] = useState<Branch[]>(INITIAL_BRANCHES);
+    const [activeBranchId, setActiveBranchId] = useState<string | number>(1);
+    const [defaultBranchId, setDefaultBranchId] = useState<string | number | null>(1);
+    const [isBranchModalOpen, setIsBranchModalOpen] = useState(false);
+
     const [isBusinessOpen, setIsBusinessOpen] = useState(true);
     const [coverUrl, setCoverUrl] = useState(PRESET_COVERS[0].url);
     const [profile, setProfile] = useState<Profile>(INITIAL_PROFILE);
@@ -378,7 +418,7 @@ export default function Dashboard() {
     const [newDishName, setNewDishName] = useState('');
     const [newDishPrice, setNewDishPrice] = useState('');
     const [newDishCategory, setNewDishCategory] = useState('Main Course');
-    const newDishDiet: MenuItem['diet'] = 'Veg';
+    const [newDishDiet, setNewDishDiet] = useState<MenuItem['diet']>('Veg');
 
     const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>(INITIAL_GALLERY_PHOTOS);
     const [galleryFilter, setGalleryFilter] = useState('All');
@@ -396,6 +436,7 @@ export default function Dashboard() {
     const [editTheme, setEditTheme] = useState<AccentTheme>(profile.accentTheme);
 
     const theme = ACCENT_THEMES[profile.accentTheme] || ACCENT_THEMES.teal;
+    const activeBranch = branches.find((b) => b.id === activeBranchId) || branches[0];
 
     useEffect(() => {
         const handleOutside = (e: globalThis.MouseEvent) => {
@@ -461,9 +502,7 @@ export default function Dashboard() {
         const text = (replyDrafts[id] || '').trim();
         if (!text) return;
         setComplaints((prev) =>
-            prev.map((c) =>
-                c.id === id ? { ...c, status: 'Resolved', reply: text } : c
-            )
+            prev.map((c) => (c.id === id ? { ...c, status: 'Resolved', reply: text } : c))
         );
         setReplyDrafts((prev) => ({ ...prev, [id]: '' }));
         triggerToast('Reply sent & complaint resolved');
@@ -534,6 +573,35 @@ export default function Dashboard() {
         e.target.value = '';
     };
 
+    const handleEnterBranch = (branch: Branch, options: { setAsDefaultOnLogin: boolean }) => {
+        setActiveBranchId(branch.id);
+        if (options.setAsDefaultOnLogin) {
+            setDefaultBranchId(branch.id);
+            setProfile((prev) => ({
+                ...prev,
+                location: branch.location || prev.location,
+            }));
+        }
+        setIsBranchModalOpen(false);
+        triggerToast(
+            `Switched to ${branch.name}${options.setAsDefaultOnLogin ? ' (set as default on login)' : ''}`
+        );
+    };
+
+    const handleAddNewBranch = () => {
+        const nextNum = branches.length + 1;
+        const created: Branch = {
+            id: Date.now(),
+            name: `New Branch #${nextNum}`,
+            code: `BR-0${nextNum}`,
+            location: 'Thrissur, Kerala',
+            isActive: true,
+        };
+        setBranches((prev) => [...prev, created]);
+        setActiveBranchId(created.id);
+        triggerToast(`Added "${created.name}"`);
+    };
+
     const unreadCount = notifications.filter((n) => n.unread).length;
     const openComplaintsCount = complaints.filter((c) => c.status !== 'Resolved').length;
 
@@ -546,6 +614,11 @@ export default function Dashboard() {
         galleryFilter === 'All'
             ? galleryPhotos
             : galleryPhotos.filter((p) => p.category === galleryFilter);
+
+    const avgRating =
+        reviews.length > 0
+            ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+            : '0.0';
 
     const sidebarNav = [
         { id: 'overview', label: 'Overview & Brand', icon: LayoutDashboard },
@@ -571,987 +644,892 @@ export default function Dashboard() {
     ];
 
     return (
-        <div className="min-h-screen bg-[#f4f7f6] text-slate-900 font-sans antialiased flex">
-            {/* Toast Stack */}
-            <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none">
-                {toasts.map((toast) => (
-                    <div
-                        key={toast.id}
-                        className="pointer-events-auto flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-medium border border-slate-800"
-                    >
-                        {toast.type === 'success' ? (
-                            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                        ) : (
-                            <Info className="w-4 h-4 text-amber-400 shrink-0" />
-                        )}
-                        <span>{toast.message}</span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Mobile Sidebar Overlay */}
-            {mobileNavOpen && (
-                <div
-                    className="fixed inset-0 bg-slate-950/50 z-40 lg:hidden"
-                    onClick={() => setMobileNavOpen(false)}
-                />
-            )}
-
-            {/* Mobile menu button (replaces the removed header's hamburger) */}
-            <button
-                type="button"
-                onClick={() => setMobileNavOpen(true)}
-                aria-label="Open navigation"
-                className={`lg:hidden fixed bottom-5 left-5 z-30 w-12 h-12 rounded-full ${theme.bgClass} ${theme.hoverBgClass} text-white shadow-lg flex items-center justify-center cursor-pointer`}
-            >
-                <Menu className="w-5 h-5" />
-            </button>
-
-            {/* Left Workspace Sidebar */}
-            <aside
-                className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white text-slate-950 flex flex-col transition-transform duration-200 ${
-                    mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-                }`}
-            >
-                <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800/80">
-                    <div className="flex items-center gap-2.5">
+        <>
+            <div className="min-h-screen bg-[#f4f7f6] text-slate-900 font-sans antialiased flex">
+                {/* Toast Stack */}
+                <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none">
+                    {toasts.map((toast) => (
                         <div
-                            className={`w-8 h-8 rounded-xl ${theme.bgClass} text-white font-bold flex items-center justify-center shadow-sm`}
+                            key={toast.id}
+                            className="pointer-events-auto flex items-center gap-2.5 bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-xl text-xs font-medium border border-slate-800"
                         >
-                            D
+                            {toast.type === 'success' ? (
+                                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                            ) : (
+                                <Info className="w-4 h-4 text-amber-400 shrink-0" />
+                            )}
+                            <span>{toast.message}</span>
                         </div>
-                        <div>
-                            <span className="text-white font-bold text-base tracking-tight block leading-none">
-                                Dresto
-                            </span>
-                            <span className="text-[10px] text-slate-400 uppercase tracking-wider">
-                                Owner Suite
-                            </span>
-                        </div>
-                    </div>
+                    ))}
+                </div>
 
-                    <div className="flex items-center gap-1.5">
-                        {/* Notifications Dropdown (moved here from the removed header) */}
-                        <div className="relative" ref={notifRef}>
-                            <button
-                                type="button"
-                                onClick={() => setNotifOpen((prev) => !prev)}
-                                aria-label="Notifications"
-                                className="relative p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer"
+                {/* Mobile Sidebar Overlay */}
+                {mobileNavOpen && (
+                    <div
+                        className="fixed inset-0 bg-slate-950/50 z-40 lg:hidden"
+                        onClick={() => setMobileNavOpen(false)}
+                    />
+                )}
+
+                {/* Mobile menu button */}
+                <button
+                    type="button"
+                    onClick={() => setMobileNavOpen(true)}
+                    aria-label="Open navigation"
+                    className={`lg:hidden fixed bottom-5 left-5 z-30 w-12 h-12 rounded-full ${theme.bgClass} ${theme.hoverBgClass} text-white shadow-lg flex items-center justify-center cursor-pointer`}
+                >
+                    <Menu className="w-5 h-5" />
+                </button>
+
+                {/* Left Workspace Sidebar */}
+                <aside
+                    className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-950 text-white flex flex-col transition-transform duration-200 ${
+                        mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                    }`}
+                >
+                    <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800/80">
+                        <div className="flex items-center gap-2.5">
+                            <div
+                                className={`w-8 h-8 rounded-xl ${theme.bgClass} text-white font-bold flex items-center justify-center shadow-sm`}
                             >
-                                <Bell className="w-4 h-4" />
-                                {unreadCount > 0 && (
-                                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                                        {unreadCount}
-                                    </span>
-                                )}
-                            </button>
+                                D
+                            </div>
+                            <div>
+                                <span className="text-white font-bold text-base tracking-tight block leading-none">
+                                    Dresto
+                                </span>
+                                <span className="text-[10px] text-slate-400 uppercase tracking-wider">
+                                    Owner Suite
+                                </span>
+                            </div>
+                        </div>
 
-                            {notifOpen && (
-                                <div className="absolute left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-40">
-                                    <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                                        <span className="text-xs font-bold text-slate-900">
-                                            Notifications
+                        <div className="flex items-center gap-1.5">
+                            <div className="relative" ref={notifRef}>
+                                <button
+                                    type="button"
+                                    onClick={() => setNotifOpen((prev) => !prev)}
+                                    aria-label="Notifications"
+                                    className="relative p-2 rounded-xl border border-slate-800 text-slate-300 hover:bg-slate-900 transition cursor-pointer"
+                                >
+                                    <Bell className="w-4 h-4" />
+                                    {unreadCount > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
+                                            {unreadCount}
                                         </span>
-                                        <button
-                                            onClick={() =>
-                                                setNotifications((prev) =>
-                                                    prev.map((n) => ({ ...n, unread: false }))
-                                                )
-                                            }
-                                            className={`text-[11px] font-semibold ${theme.textClass} hover:underline cursor-pointer`}
-                                        >
-                                            Mark all read
-                                        </button>
-                                    </div>
-                                    <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
-                                        {notifications.map((n) => (
-                                            <div
-                                                key={n.id}
+                                    )}
+                                </button>
+
+                                {notifOpen && (
+                                    <div className="absolute left-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-40 text-slate-900">
+                                        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                                            <span className="text-xs font-bold text-slate-900">
+                                                Notifications
+                                            </span>
+                                            <button
+                                                type="button"
                                                 onClick={() =>
                                                     setNotifications((prev) =>
-                                                        prev.map((item) =>
-                                                            item.id === n.id
-                                                                ? { ...item, unread: false }
-                                                                : item
-                                                        )
+                                                        prev.map((n) => ({ ...n, unread: false }))
                                                     )
                                                 }
-                                                className={`p-3.5 text-xs cursor-pointer transition hover:bg-slate-50 ${
-                                                    n.unread ? 'bg-teal-50/30' : ''
+                                                className={`text-[11px] font-semibold ${theme.textClass} hover:underline cursor-pointer`}
+                                            >
+                                                Mark all read
+                                            </button>
+                                        </div>
+                                        <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto">
+                                            {notifications.map((n) => (
+                                                <div
+                                                    key={n.id}
+                                                    onClick={() =>
+                                                        setNotifications((prev) =>
+                                                            prev.map((item) =>
+                                                                item.id === n.id
+                                                                    ? { ...item, unread: false }
+                                                                    : item
+                                                            )
+                                                        )
+                                                    }
+                                                    className={`p-3.5 text-xs cursor-pointer transition hover:bg-slate-50 ${
+                                                        n.unread ? 'bg-teal-50/30' : ''
+                                                    }`}
+                                                >
+                                                    <div className="flex justify-between font-semibold text-slate-900">
+                                                        <span>{n.title}</span>
+                                                        <span className="text-[10px] text-slate-400">
+                                                            {n.time}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-slate-500 mt-1 leading-relaxed">
+                                                        {n.message}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => setMobileNavOpen(false)}
+                                aria-label="Close navigation"
+                                className="lg:hidden text-slate-400 hover:text-white"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+
+                    <nav className="flex-1 px-3 py-5 space-y-1">
+                        {sidebarNav.map((item) => {
+                            const Icon = item.icon;
+                            const active = activeTab === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    onClick={() => {
+                                        setActiveTab(item.id);
+                                        setMobileNavOpen(false);
+                                    }}
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                                        active
+                                            ? `${theme.bgClass} text-white shadow-sm`
+                                            : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                                    }`}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        <Icon className="w-4 h-4" />
+                                        {item.label}
+                                    </span>
+                                    {item.badge !== null && item.badge !== undefined && (
+                                        <span
+                                            className={`px-2 py-0.5 rounded-full text-[10px] ${
+                                                active
+                                                    ? 'bg-white/20 text-white'
+                                                    : 'bg-slate-800 text-slate-300'
+                                            }`}
+                                        >
+                                            {item.badge}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </nav>
+
+                    {/* Live Storefront Status Card inside Sidebar */}
+                    <div className="p-4 m-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                        <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-semibold text-slate-400">
+                                Storefront Status
+                            </span>
+                            <span
+                                className={`inline-flex items-center gap-1.5 text-[11px] font-bold ${
+                                    isBusinessOpen ? 'text-emerald-400' : 'text-rose-400'
+                                }`}
+                            >
+                                <span
+                                    className={`w-2 h-2 rounded-full ${
+                                        isBusinessOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                                    }`}
+                                />
+                                {isBusinessOpen ? 'Open' : 'Closed'}
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setIsBusinessOpen((prev) => !prev);
+                                triggerToast(
+                                    !isBusinessOpen ? 'Property is now Open' : 'Property set to Closed',
+                                    'info'
+                                );
+                            }}
+                            className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
+                        >
+                            {isBusinessOpen ? 'Pause Reservations' : 'Go Live Now'}
+                        </button>
+                    </div>
+                </aside>
+
+                {/* Main Content Shell */}
+                <div className="flex-1 flex flex-col min-w-0">
+                    <main className="flex-1 p-4 sm:p-8 max-w-[1400px] w-full mx-auto space-y-6">
+                        {/* Compact Split Hero Profile Card */}
+                        <section className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+                            <div className="lg:col-span-5 relative min-h-[220px] bg-slate-900 group overflow-hidden">
+                                <img
+                                    src={coverUrl}
+                                    alt="Cover"
+                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-slate-950/20" />
+
+                                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2" ref={presetRef}>
+                                    <div className="relative">
+                                        <button
+                                            type="button"
+                                            onClick={() => setPresetOpen((prev) => !prev)}
+                                            className="px-3 py-1.5 rounded-xl bg-slate-950/75 hover:bg-slate-950 text-white text-xs font-medium backdrop-blur-xs transition cursor-pointer"
+                                        >
+                                            Presets
+                                        </button>
+                                        {presetOpen && (
+                                            <div className="absolute bottom-full left-0 mb-2 w-60 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 grid grid-cols-2 gap-1.5 z-20">
+                                                {PRESET_COVERS.map((preset) => (
+                                                    <button
+                                                        key={preset.label}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setCoverUrl(preset.url);
+                                                            setPresetOpen(false);
+                                                            triggerToast(`Cover set to ${preset.label}`);
+                                                        }}
+                                                        className="group/item text-left rounded-xl overflow-hidden border border-slate-100 hover:border-slate-300 cursor-pointer"
+                                                    >
+                                                        <img
+                                                            src={preset.thumb}
+                                                            alt={preset.label}
+                                                            className="w-full h-14 object-cover"
+                                                        />
+                                                        <span className="block px-2 py-1 text-[11px] font-medium text-slate-700 truncate">
+                                                            {preset.label}
+                                                        </span>
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-900 text-xs font-semibold shadow-xs cursor-pointer transition">
+                                        <Camera className="w-3.5 h-3.5" />
+                                        <span>Upload Cover</span>
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleLocalCoverUpload}
+                                            className="hidden"
+                                        />
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-7 p-5 sm:p-6 flex flex-col justify-between gap-4">
+                                <div className="space-y-3">
+                                    <div className="flex flex-wrap items-start justify-between gap-3">
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                                                    {profile.name}
+                                                </h1>
+                                                {activeBranch && (
+                                                    <span
+                                                        className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold ${theme.softBgClass} ${theme.textClass}`}
+                                                    >
+                                                        <Building2 className="w-3.5 h-3.5" />
+                                                        {activeBranch.name}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                                                {profile.tagline}
+                                            </p>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsBranchModalOpen(true)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold transition cursor-pointer"
+                                            >
+                                                <Building2 className="w-3.5 h-3.5" />
+                                                <span>Switch Branch</span>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={openProfileModal}
+                                                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold transition cursor-pointer`}
+                                            >
+                                                <SlidersHorizontal className="w-3.5 h-3.5" />
+                                                <span>Edit Profile</span>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {profile.cuisines.map((c) => (
+                                            <span
+                                                key={c}
+                                                className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 text-[11px] font-medium"
+                                            >
+                                                {c}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
+                                    <div className="flex items-center gap-2 truncate">
+                                        <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span className="truncate">{profile.location}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 truncate">
+                                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span className="truncate">{profile.hours}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 truncate">
+                                        <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span className="truncate">{profile.contact}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        {/* Overview Tab */}
+                        {activeTab === 'overview' && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-white rounded-2xl border border-slate-200/80 p-5">
+                                    <p className="text-xs font-medium text-slate-500">Open Complaints</p>
+                                    <p className="text-2xl font-bold text-slate-900 mt-1">
+                                        {openComplaintsCount}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('complaints')}
+                                        className={`mt-3 text-xs font-semibold ${theme.textClass} hover:underline cursor-pointer`}
+                                    >
+                                        View complaints →
+                                    </button>
+                                </div>
+                                <div className="bg-white rounded-2xl border border-slate-200/80 p-5">
+                                    <p className="text-xs font-medium text-slate-500">Menu Items</p>
+                                    <p className="text-2xl font-bold text-slate-900 mt-1">
+                                        {menuItems.length}
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('menu')}
+                                        className={`mt-3 text-xs font-semibold ${theme.textClass} hover:underline cursor-pointer`}
+                                    >
+                                        Manage menu →
+                                    </button>
+                                </div>
+                                <div className="bg-white rounded-2xl border border-slate-200/80 p-5">
+                                    <p className="text-xs font-medium text-slate-500">Guest Rating</p>
+                                    <p className="text-2xl font-bold text-slate-900 mt-1">
+                                        {avgRating} ★
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setActiveTab('reviews')}
+                                        className={`mt-3 text-xs font-semibold ${theme.textClass} hover:underline cursor-pointer`}
+                                    >
+                                        Read reviews →
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Complaints Tab */}
+                        {activeTab === 'complaints' && (
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <h2 className="text-lg font-bold text-slate-900">Guest Complaints</h2>
+                                    <div className="flex gap-1.5">
+                                        {(['All', 'Pending', 'In Progress', 'Resolved'] as const).map((status) => (
+                                            <button
+                                                key={status}
+                                                type="button"
+                                                onClick={() => setComplaintFilter(status)}
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
+                                                    complaintFilter === status
+                                                        ? `${theme.bgClass} text-white`
+                                                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
                                                 }`}
                                             >
-                                                <div className="flex justify-between font-semibold text-slate-900">
-                                                    <span>{n.title}</span>
-                                                    <span className="text-[10px] text-slate-400">
-                                                        {n.time}
+                                                {status}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    {filteredComplaints.map((c) => (
+                                        <div
+                                            key={c.id}
+                                            className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-3"
+                                        >
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <div>
+                                                    <span className="font-bold text-sm text-slate-900">
+                                                        {c.customer}
+                                                    </span>
+                                                    <span className="text-xs text-slate-500 ml-2">
+                                                        {c.unit} • {c.time}
                                                     </span>
                                                 </div>
-                                                <p className="text-slate-500 mt-1 leading-relaxed">
-                                                    {n.message}
-                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700">
+                                                        <AlertCircle className="w-3 h-3" />
+                                                        {c.severity}
+                                                    </span>
+                                                    <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-700">
+                                                        {c.status}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <p className="text-xs sm:text-sm text-slate-700">{c.text}</p>
+
+                                            {c.reply && (
+                                                <div className="p-3 rounded-xl bg-slate-50 text-xs text-slate-600">
+                                                    <span className="font-semibold text-slate-800">
+                                                        Response:{' '}
+                                                    </span>
+                                                    {c.reply}
+                                                </div>
+                                            )}
+
+                                            {c.status !== 'Resolved' && (
+                                                <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                                                    <input
+                                                        type="text"
+                                                        value={replyDrafts[c.id] || ''}
+                                                        onChange={(e) =>
+                                                            setReplyDrafts((prev) => ({
+                                                                ...prev,
+                                                                [c.id]: e.target.value,
+                                                            }))
+                                                        }
+                                                        placeholder="Write a resolution note..."
+                                                        className={`flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-xs outline-none ${theme.ringClass}`}
+                                                    />
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleSendComplaintReply(c.id)}
+                                                        className={`inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold cursor-pointer`}
+                                                    >
+                                                        <Send className="w-3.5 h-3.5" />
+                                                        <span>Reply & Resolve</span>
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleQuickResolve(c.id)}
+                                                        className="px-3.5 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer"
+                                                    >
+                                                        Quick Resolve
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Menu Tab */}
+                        {activeTab === 'menu' && (
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                                <div className="lg:col-span-7 space-y-4">
+                                    <form
+                                        onSubmit={handleAddDish}
+                                        className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-3"
+                                    >
+                                        <h2 className="text-sm font-bold text-slate-900">Add Dish</h2>
+                                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+                                            <input
+                                                type="text"
+                                                value={newDishName}
+                                                onChange={(e) => setNewDishName(e.target.value)}
+                                                placeholder="Dish name"
+                                                className="sm:col-span-2 px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                                            />
+                                            <input
+                                                type="number"
+                                                value={newDishPrice}
+                                                onChange={(e) => setNewDishPrice(e.target.value)}
+                                                placeholder="Price (₹)"
+                                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                                            />
+                                            <select
+                                                value={newDishDiet}
+                                                onChange={(e) =>
+                                                    setNewDishDiet(e.target.value as MenuItem['diet'])
+                                                }
+                                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs bg-white"
+                                            >
+                                                <option value="Veg">Veg</option>
+                                                <option value="Non-Veg">Non-Veg</option>
+                                            </select>
+                                        </div>
+                                        <div className="flex items-center justify-between gap-2">
+                                            <input
+                                                type="text"
+                                                value={newDishCategory}
+                                                onChange={(e) => setNewDishCategory(e.target.value)}
+                                                placeholder="Category"
+                                                className="px-3 py-2 rounded-xl border border-slate-200 text-xs"
+                                            />
+                                            <button
+                                                type="submit"
+                                                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold cursor-pointer`}
+                                            >
+                                                <Plus className="w-3.5 h-3.5" />
+                                                <span>Add Item</span>
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <div className="bg-white rounded-2xl border border-slate-200/80 divide-y divide-slate-100">
+                                        {menuItems.map((item) => (
+                                            <div
+                                                key={item.id}
+                                                className="p-4 flex items-center justify-between gap-3"
+                                            >
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-sm text-slate-900">
+                                                            {item.name}
+                                                        </span>
+                                                        <span className="text-[11px] px-2 py-0.5 rounded bg-slate-100 text-slate-600">
+                                                            {item.diet} • {item.category}
+                                                        </span>
+                                                    </div>
+                                                    <p className="text-xs text-slate-500 mt-0.5">
+                                                        {item.desc}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-bold text-sm text-slate-900">
+                                                        ₹{item.price}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            setMenuItems((prev) =>
+                                                                prev.map((m) =>
+                                                                    m.id === item.id
+                                                                        ? { ...m, available: !m.available }
+                                                                        : m
+                                                                )
+                                                            )
+                                                        }
+                                                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
+                                                            item.available
+                                                                ? 'bg-emerald-50 text-emerald-700'
+                                                                : 'bg-rose-50 text-rose-700'
+                                                        }`}
+                                                    >
+                                                        {item.available ? 'Available' : 'Sold Out'}
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                            )}
-                        </div>
 
-                        <button
-                            onClick={() => setMobileNavOpen(false)}
-                            aria-label="Close navigation"
-                            className="lg:hidden text-slate-400 hover:text-white"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-                    </div>
-                </div>
-
-                <nav className="flex-1 px-3 py-5 space-y-1">
-                    {sidebarNav.map((item) => {
-                        const Icon = item.icon;
-                        const active = activeTab === item.id;
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => {
-                                    setActiveTab(item.id);
-                                    setMobileNavOpen(false);
-                                }}
-                                className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                                    active
-                                        ? `${theme.bgClass} text-white shadow-sm`
-                                        : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                                }`}
-                            >
-                                <span className="flex items-center gap-3">
-                                    <Icon className="w-4 h-4" />
-                                    {item.label}
-                                </span>
-                                {item.badge !== null && item.badge !== undefined && (
-                                    <span
-                                        className={`px-2 py-0.5 rounded-full text-[10px] ${
-                                            active
-                                                ? 'bg-white/20 text-white'
-                                                : 'bg-slate-800 text-slate-300'
-                                        }`}
-                                    >
-                                        {item.badge}
-                                    </span>
-                                )}
-                            </button>
-                        );
-                    })}
-                </nav>
-
-                {/* Live Storefront Status Card inside Sidebar */}
-                <div className="p-4 m-3 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-                    <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-semibold text-slate-400">
-                            Storefront Status
-                        </span>
-                        <span
-                            className={`inline-flex items-center gap-1.5 text-[11px] font-bold ${
-                                isBusinessOpen ? 'text-emerald-400' : 'text-rose-400'
-                            }`}
-                        >
-                            <span
-                                className={`w-2 h-2 rounded-full ${
-                                    isBusinessOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-                                }`}
-                            />
-                            {isBusinessOpen ? 'Open' : 'Closed'}
-                        </span>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={() => {
-                            setIsBusinessOpen((prev) => !prev);
-                            triggerToast(
-                                !isBusinessOpen ? 'Property is now Open' : 'Property set to Closed',
-                                'info'
-                            );
-                        }}
-                        className="w-full py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold transition cursor-pointer"
-                    >
-                        {isBusinessOpen ? 'Pause Reservations' : 'Go Live Now'}
-                    </button>
-                </div>
-            </aside>
-
-            {/* Main Content Shell */}
-            <div className="flex-1 flex flex-col min-w-0">
-                {/* Workspace Content */}
-                <main className="flex-1 p-4 sm:p-8 max-w-[1400px] w-full mx-auto space-y-6">
-                    {/* Compact Split Hero Profile Card */}
-                    <section className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-                        <div className="lg:col-span-5 relative min-h-[210px] bg-slate-900 group overflow-hidden">
-                            <img
-                                src={coverUrl}
-                                alt="Cover"
-                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-slate-950/20" />
-
-                            <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between gap-2">
-                                <div className="relative" ref={presetRef}>
-                                    <button
-                                        type="button"
-                                        onClick={() => setPresetOpen((p) => !p)}
-                                        className="px-3 py-1.5 rounded-xl bg-slate-950/75 hover:bg-slate-950 text-white text-[11px] font-semibold backdrop-blur-md border border-white/15 flex items-center gap-1.5 cursor-pointer"
-                                    >
-                                        <Images className="w-3.5 h-3.5 text-teal-300" />
-                                        Presets
-                                    </button>
-                                    {presetOpen && (
-                                        <div className="absolute bottom-10 left-0 w-56 bg-white rounded-2xl shadow-xl border border-slate-200 p-2.5 z-30 grid grid-cols-2 gap-2">
-                                            {PRESET_COVERS.map((preset) => (
-                                                <button
-                                                    key={preset.label}
-                                                    type="button"
-                                                    onClick={() => {
-                                                        setCoverUrl(preset.url);
-                                                        setPresetOpen(false);
-                                                        triggerToast(`Banner set to ${preset.label}`);
-                                                    }}
-                                                    className="relative h-12 rounded-lg overflow-hidden border border-slate-200 cursor-pointer"
-                                                >
-                                                    <img
-                                                        src={preset.thumb}
-                                                        alt={preset.label}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <span className="absolute inset-0 bg-black/45 text-white text-[10px] font-semibold flex items-center justify-center">
-                                                        {preset.label}
-                                                    </span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-
-                                <label
-                                    htmlFor="cover-file"
-                                    className="px-3 py-1.5 rounded-xl bg-white/95 hover:bg-white text-slate-900 text-[11px] font-semibold flex items-center gap-1.5 shadow cursor-pointer"
-                                >
-                                    <Camera className={`w-3.5 h-3.5 ${theme.textClass}`} />
-                                    Change Cover
-                                </label>
-                                <input
-                                    id="cover-file"
-                                    type="file"
-                                    accept="image/*"
-                                    className="hidden"
-                                    onChange={handleLocalCoverUpload}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="lg:col-span-7 p-6 flex flex-col justify-between space-y-4">
-                            <div>
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold">
-                                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                                        4.9 Rating (1,280 reviews)
-                                    </span>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-xs text-slate-400 font-medium">
-                                            ID #DR-8841
-                                        </span>
-                                        {/* Customize Profile (moved here from the removed header) */}
-                                        <button
-                                            type="button"
-                                            onClick={openProfileModal}
-                                            className={`${theme.bgClass} ${theme.hoverBgClass} text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition cursor-pointer`}
-                                        >
-                                            <SlidersHorizontal className="w-3.5 h-3.5" />
-                                            Customize Profile
-                                        </button>
+                                <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 p-5 space-y-4 self-start">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-sm font-bold text-slate-900">Menu Files</h2>
+                                        <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-800 cursor-pointer">
+                                            <UploadCloud className="w-3.5 h-3.5" />
+                                            <span>Upload</span>
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept=".pdf,image/*"
+                                                onChange={handleUploadMenuFiles}
+                                                className="hidden"
+                                            />
+                                        </label>
                                     </div>
-                                </div>
 
-                                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 mt-2">
-                                    {profile.name}
-                                </h1>
-                                <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                                    {profile.tagline}
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-3 border-t border-slate-100 text-xs text-slate-600">
-                                <div className="flex items-center gap-2">
-                                    <MapPin className={`w-4 h-4 shrink-0 ${theme.textClass}`} />
-                                    <span className="truncate">{profile.location}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className={`w-4 h-4 shrink-0 ${theme.textClass}`} />
-                                    <span className="truncate">{profile.hours}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone className={`w-4 h-4 shrink-0 ${theme.textClass}`} />
-                                    <span className="truncate">{profile.contact}</span>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-1.5">
-                                {profile.cuisines.map((tag) => (
-                                    <span
-                                        key={tag}
-                                        className={`px-2.5 py-1 rounded-lg ${theme.softBgClass} ${theme.textClass} text-[11px] font-semibold`}
-                                    >
-                                        {tag}
-                                    </span>
-                                ))}
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* KPI Strip */}
-                    <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
-                            <div className="flex items-center justify-between text-slate-400">
-                                <span className="text-xs font-medium">Covers &amp; Rooms</span>
-                                <Users className={`w-4 h-4 ${theme.textClass}`} />
-                            </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-extrabold text-slate-900">148</span>
-                                <span className="text-[11px] font-bold text-emerald-600 flex items-center">
-                                    <TrendingUp className="w-3 h-3 mr-0.5" /> +14%
-                                </span>
-                            </div>
-                        </div>
-
-                        <div
-                            onClick={() => setActiveTab('complaints')}
-                            className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs cursor-pointer hover:border-slate-300 transition"
-                        >
-                            <div className="flex items-center justify-between text-slate-400">
-                                <span className="text-xs font-medium">Open Complaints</span>
-                                <AlertCircle className="w-4 h-4 text-rose-500" />
-                            </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-extrabold text-slate-900">
-                                    {openComplaintsCount}
-                                </span>
-                                <span className="text-[11px] font-semibold text-rose-600">
-                                    {openComplaintsCount > 0 ? 'Action needed' : 'All clear'}
-                                </span>
-                            </div>
-                        </div>
-
-                        <div
-                            onClick={() => setActiveTab('menu')}
-                            className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs cursor-pointer hover:border-slate-300 transition"
-                        >
-                            <div className="flex items-center justify-between text-slate-400">
-                                <span className="text-xs font-medium">Live Menu Dishes</span>
-                                <BookOpenCheck className={`w-4 h-4 ${theme.textClass}`} />
-                            </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-extrabold text-slate-900">
-                                    {menuItems.length}
-                                </span>
-                                <span className="text-[11px] text-slate-400">
-                                    {menuFiles.length} PDFs
-                                </span>
-                            </div>
-                        </div>
-
-                        <div
-                            onClick={() => setActiveTab('photos')}
-                            className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs cursor-pointer hover:border-slate-300 transition"
-                        >
-                            <div className="flex items-center justify-between text-slate-400">
-                                <span className="text-xs font-medium">Gallery Photos</span>
-                                <Camera className="w-4 h-4 text-amber-500" />
-                            </div>
-                            <div className="mt-2 flex items-baseline gap-2">
-                                <span className="text-2xl font-extrabold text-slate-900">
-                                    {galleryPhotos.length}
-                                </span>
-                                <span className="text-[11px] text-slate-400">Synced</span>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Active Workspace Panels */}
-                    {(activeTab === 'overview' || activeTab === 'complaints') && (
-                        <section className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-5">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">
-                                        Guest Complaints &amp; Service Desk
-                                    </h3>
-                                    <p className="text-xs text-slate-500">
-                                        Respond to live table and room issues in real time
-                                    </p>
-                                </div>
-                                <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-                                    {(['All', 'Pending', 'In Progress', 'Resolved'] as const).map((status) => (
-                                        <button
-                                            key={status}
-                                            onClick={() => setComplaintFilter(status)}
-                                            className={`px-3 py-1 rounded-lg text-xs font-semibold transition cursor-pointer ${
-                                                complaintFilter === status
-                                                    ? 'bg-white text-slate-900 shadow-2xs'
-                                                    : 'text-slate-600 hover:text-slate-900'
-                                            }`}
-                                        >
-                                            {status}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredComplaints.map((item) => (
-                                    <div
-                                        key={item.id}
-                                        className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 flex flex-col justify-between space-y-4"
-                                    >
-                                        <div className="space-y-2.5">
-                                            <div className="flex items-start justify-between gap-2">
-                                                <div>
-                                                    <p className="text-sm font-bold text-slate-900">
-                                                        {item.customer}
-                                                    </p>
-                                                    <p className="text-[11px] text-slate-500">
-                                                        {item.unit} • {item.time}
-                                                    </p>
-                                                </div>
-                                                <span
-                                                    className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                                        item.status === 'Resolved'
-                                                            ? 'bg-emerald-100 text-emerald-700'
-                                                            : item.status === 'In Progress'
-                                                            ? 'bg-amber-100 text-amber-700'
-                                                            : 'bg-rose-100 text-rose-700'
-                                                    }`}
-                                                >
-                                                    {item.status}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-slate-700 leading-relaxed">
-                                                {item.text}
-                                            </p>
-                                            {item.reply && (
-                                                <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-[11px] text-slate-600">
-                                                    <strong className="text-slate-800">Response:</strong>{' '}
-                                                    {item.reply}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {item.status !== 'Resolved' && (
-                                            <div className="space-y-2 pt-2 border-t border-slate-200/60">
-                                                <div className="flex gap-1.5">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Write resolution reply..."
-                                                        value={replyDrafts[item.id] || ''}
-                                                        onChange={(e) =>
-                                                            setReplyDrafts((prev) => ({
-                                                                ...prev,
-                                                                [item.id]: e.target.value,
-                                                            }))
-                                                        }
-                                                        className="flex-1 px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none"
-                                                    />
-                                                    <button
-                                                        onClick={() =>
-                                                            handleSendComplaintReply(item.id)
-                                                        }
-                                                        className={`${theme.bgClass} text-white px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer`}
-                                                    >
-                                                        <Send className="w-3.5 h-3.5" />
-                                                    </button>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleQuickResolve(item.id)}
-                                                    className="w-full py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 text-[11px] font-semibold transition cursor-pointer"
-                                                >
-                                                    Quick Resolve
-                                                </button>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {(activeTab === 'overview' || activeTab === 'menu') && (
-                        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                            {/* Menu Files Upload */}
-                            <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-4">
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">
-                                        Menu PDFs &amp; Scans
-                                    </h3>
-                                    <p className="text-xs text-slate-500">
-                                        Upload printable or QR digital menu files
-                                    </p>
-                                </div>
-
-                                <label
-                                    htmlFor="menu-doc-upload"
-                                    className="border-2 border-dashed border-slate-200 hover:border-[#148873] rounded-2xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition bg-slate-50/50"
-                                >
-                                    <UploadCloud className={`w-7 h-7 ${theme.textClass} mb-2`} />
-                                    <span className="text-xs font-bold text-slate-800">
-                                        Click to upload Menu PDF or Image
-                                    </span>
-                                    <span className="text-[11px] text-slate-400 mt-1">
-                                        PDF, PNG, JPG up to 15MB
-                                    </span>
-                                </label>
-                                <input
-                                    id="menu-doc-upload"
-                                    type="file"
-                                    multiple
-                                    accept=".pdf,image/*"
-                                    className="hidden"
-                                    onChange={handleUploadMenuFiles}
-                                />
-
-                                <div className="space-y-2">
-                                    {menuFiles.map((file) => (
-                                        <div
-                                            key={file.id}
-                                            className="p-3 rounded-xl border border-slate-100 bg-slate-50 flex items-center justify-between gap-2"
-                                        >
-                                            <div className="flex items-center gap-2.5 min-w-0">
-                                                <FileText
-                                                    className={`w-4 h-4 shrink-0 ${theme.textClass}`}
-                                                />
-                                                <div className="truncate">
-                                                    <p className="text-xs font-semibold text-slate-800 truncate">
-                                                        {file.name}
-                                                    </p>
-                                                    <p className="text-[10px] text-slate-400">
-                                                        {file.size} • {file.uploadedAt}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <button
-                                                onClick={() =>
-                                                    setMenuFiles((prev) =>
-                                                        prev.filter((f) => f.id !== file.id)
-                                                    )
-                                                }
-                                                className="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer"
+                                    <div className="space-y-2">
+                                        {menuFiles.map((file) => (
+                                            <div
+                                                key={file.id}
+                                                className="flex items-center justify-between p-3 rounded-xl border border-slate-100 text-xs"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    ))}
+                                                <div className="flex items-center gap-2.5 min-w-0">
+                                                    <FileText className="w-4 h-4 text-slate-400 shrink-0" />
+                                                    <div className="truncate">
+                                                        <p className="font-semibold text-slate-800 truncate">
+                                                            {file.name}
+                                                        </p>
+                                                        <p className="text-[11px] text-slate-400">
+                                                            {file.size} • {file.uploadedAt}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        setMenuFiles((prev) =>
+                                                            prev.filter((f) => f.id !== file.id)
+                                                        )
+                                                    }
+                                                    aria-label={`Delete ${file.name}`}
+                                                    className="p-1.5 text-slate-400 hover:text-rose-600 cursor-pointer"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
+                        )}
 
-                            {/* Live Dishes Manager */}
-                            <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-4">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-base font-bold text-slate-900">
-                                            Digital Menu Items
-                                        </h3>
-                                        <p className="text-xs text-slate-500">
-                                            Toggle stock availability or add new dishes
-                                        </p>
+                        {/* Photos Tab */}
+                        {activeTab === 'photos' && (
+                            <div className="space-y-4">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                    <div className="flex gap-1.5">
+                                        {['All', 'Ambiance', 'Food & Drinks', 'Rooms'].map((cat) => (
+                                            <button
+                                                key={cat}
+                                                type="button"
+                                                onClick={() => setGalleryFilter(cat)}
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${
+                                                    galleryFilter === cat
+                                                        ? `${theme.bgClass} text-white`
+                                                        : 'bg-white text-slate-600 border border-slate-200'
+                                                }`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <select
+                                            value={uploadCategory}
+                                            onChange={(e) => setUploadCategory(e.target.value)}
+                                            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs"
+                                        >
+                                            <option value="Ambiance">Ambiance</option>
+                                            <option value="Food & Drinks">Food & Drinks</option>
+                                            <option value="Rooms">Rooms</option>
+                                        </select>
+                                        <label
+                                            className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold cursor-pointer`}
+                                        >
+                                            <ImagePlus className="w-3.5 h-3.5" />
+                                            <span>Add Photos</span>
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                onChange={handleUploadPhotos}
+                                                className="hidden"
+                                            />
+                                        </label>
                                     </div>
                                 </div>
 
-                                <form
-                                    onSubmit={handleAddDish}
-                                    className="grid grid-cols-1 sm:grid-cols-12 gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-200/60"
-                                >
-                                    <input
-                                        type="text"
-                                        placeholder="Dish name..."
-                                        value={newDishName}
-                                        onChange={(e) => setNewDishName(e.target.value)}
-                                        className="sm:col-span-5 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none"
-                                    />
-                                    <input
-                                        type="number"
-                                        placeholder="Price (₹)"
-                                        value={newDishPrice}
-                                        onChange={(e) => setNewDishPrice(e.target.value)}
-                                        className="sm:col-span-2 px-3 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none"
-                                    />
-                                    <select
-                                        value={newDishCategory}
-                                        onChange={(e) => setNewDishCategory(e.target.value)}
-                                        className="sm:col-span-3 px-2.5 py-2 rounded-xl bg-white border border-slate-200 text-xs focus:outline-none"
-                                    >
-                                        <option>Starters</option>
-                                        <option>Main Course</option>
-                                        <option>Breads &amp; Rice</option>
-                                        <option>Desserts</option>
-                                        <option>Cocktails</option>
-                                    </select>
-                                    <button
-                                        type="submit"
-                                        className={`sm:col-span-2 ${theme.bgClass} text-white rounded-xl text-xs font-semibold py-2 flex items-center justify-center gap-1 cursor-pointer`}
-                                    >
-                                        <Plus className="w-3.5 h-3.5" /> Add
-                                    </button>
-                                </form>
-
-                                <div className="divide-y divide-slate-100">
-                                    {menuItems.map((item) => (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {filteredPhotos.map((photo) => (
                                         <div
-                                            key={item.id}
-                                            className="py-3 flex items-center justify-between gap-3"
+                                            key={photo.id}
+                                            className="bg-white rounded-2xl border border-slate-200/80 overflow-hidden"
                                         >
-                                            <div className="min-w-0">
-                                                <div className="flex items-center gap-2">
-                                                    <span
-                                                        className={`w-2 h-2 rounded-full ${
-                                                            item.diet === 'Veg'
-                                                                ? 'bg-emerald-500'
-                                                                : 'bg-rose-500'
-                                                        }`}
-                                                    />
-                                                    <p className="text-xs font-bold text-slate-900 truncate">
-                                                        {item.name}
-                                                    </p>
-                                                    <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-500">
-                                                        {item.category}
-                                                    </span>
-                                                </div>
-                                                <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                                                    {item.desc}
-                                                </p>
-                                            </div>
-
-                                            <div className="flex items-center gap-3 shrink-0">
-                                                <span className="text-xs font-bold text-slate-900">
-                                                    ₹{item.price}
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        setMenuItems((prev) =>
-                                                            prev.map((m) =>
-                                                                m.id === item.id
-                                                                    ? {
-                                                                          ...m,
-                                                                          available: !m.available,
-                                                                      }
-                                                                    : m
-                                                            )
-                                                        )
-                                                    }
-                                                    className={`px-2.5 py-1 rounded-lg text-[10px] font-bold cursor-pointer ${
-                                                        item.available
-                                                            ? 'bg-emerald-50 text-emerald-700'
-                                                            : 'bg-slate-100 text-slate-500'
-                                                    }`}
-                                                >
-                                                    {item.available ? 'In Stock' : 'Sold Out'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </section>
-                    )}
-
-                    {(activeTab === 'overview' || activeTab === 'photos') && (
-                        <section className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-5">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">
-                                        Property Showcase Gallery
-                                    </h3>
-                                    <p className="text-xs text-slate-500">
-                                        Upload ambiance, dishes, and room photos
-                                    </p>
-                                </div>
-
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <select
-                                        value={uploadCategory}
-                                        onChange={(e) => setUploadCategory(e.target.value)}
-                                        className="px-3 py-2 rounded-xl border border-slate-200 text-xs font-medium bg-slate-50"
-                                    >
-                                        <option>Ambiance</option>
-                                        <option>Food &amp; Drinks</option>
-                                        <option>Rooms</option>
-                                        <option>Events</option>
-                                    </select>
-                                    <label
-                                        htmlFor="gallery-upload"
-                                        className={`${theme.bgClass} ${theme.hoverBgClass} text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer`}
-                                    >
-                                        <ImagePlus className="w-3.5 h-3.5" />
-                                        Upload Photos
-                                    </label>
-                                    <input
-                                        id="gallery-upload"
-                                        type="file"
-                                        multiple
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleUploadPhotos}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-1.5 overflow-x-auto">
-                                {['All', 'Ambiance', 'Food & Drinks', 'Rooms', 'Events'].map(
-                                    (cat) => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setGalleryFilter(cat)}
-                                            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                                                galleryFilter === cat
-                                                    ? 'bg-slate-900 text-white'
-                                                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200/70'
-                                            }`}
-                                        >
-                                            {cat}
-                                        </button>
-                                    )
-                                )}
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                                {filteredPhotos.map((photo) => (
-                                    <div
-                                        key={photo.id}
-                                        className="group relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 aspect-[4/3]"
-                                    >
-                                        <img
-                                            src={photo.url}
-                                            alt={photo.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                        />
-                                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent p-3.5 flex flex-col justify-between">
-                                            <div className="flex justify-between items-start">
-                                                <span className="px-2 py-0.5 rounded-md bg-black/50 backdrop-blur-xs text-white text-[10px] font-semibold">
-                                                    {photo.category}
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        setGalleryPhotos((prev) =>
-                                                            prev.filter((p) => p.id !== photo.id)
-                                                        )
-                                                    }
-                                                    className="p-1.5 rounded-lg bg-black/50 text-white hover:bg-rose-600 transition cursor-pointer"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                            <div>
-                                                <p className="text-xs font-bold text-white truncate">
+                                            <img
+                                                src={photo.url}
+                                                alt={photo.title}
+                                                className="w-full h-40 object-cover"
+                                            />
+                                            <div className="p-3">
+                                                <p className="font-semibold text-xs text-slate-900 truncate">
                                                     {photo.title}
                                                 </p>
-                                                <button
-                                                    onClick={() => {
-                                                        setCoverUrl(photo.url);
-                                                        triggerToast('Set as cover banner!');
-                                                    }}
-                                                    className="mt-1.5 text-[10px] font-semibold text-teal-300 hover:underline cursor-pointer"
-                                                >
-                                                    Set as Cover Photo →
-                                                </button>
+                                                <p className="text-[11px] text-slate-400 mt-0.5">
+                                                    {photo.category} • {photo.date}
+                                                </p>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {(activeTab === 'overview' || activeTab === 'reviews') && (
-                        <section className="bg-white rounded-3xl border border-slate-200/80 shadow-2xs p-5 sm:p-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <h3 className="text-base font-bold text-slate-900">
-                                        Verified Guest Reviews
-                                    </h3>
-                                    <p className="text-xs text-slate-500">
-                                        Recent feedback across dining and stays
-                                    </p>
+                                    ))}
                                 </div>
-                                <span className="px-3 py-1 rounded-full bg-amber-50 text-amber-800 text-xs font-bold">
-                                    4.9 ★ Overall
-                                </span>
                             </div>
+                        )}
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Reviews Tab */}
+                        {activeTab === 'reviews' && (
+                            <div className="space-y-3">
                                 {reviews.map((rev) => (
                                     <div
                                         key={rev.id}
-                                        className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2"
+                                        className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-1.5"
                                     >
                                         <div className="flex items-center justify-between">
-                                            <span className="text-xs font-bold text-slate-900">
+                                            <span className="font-bold text-sm text-slate-900">
                                                 {rev.name}
                                             </span>
-                                            <span className="text-xs text-amber-500 font-bold">
-                                                {'★'.repeat(rev.rating)}
+                                            <span className="text-xs font-semibold text-amber-600">
+                                                {'★'.repeat(rev.rating)} ({rev.rating}/5)
                                             </span>
                                         </div>
-                                        <p className="text-xs text-slate-600 leading-relaxed">
-                                            {rev.text}
-                                        </p>
-                                        <p className="text-[10px] text-slate-400">{rev.date}</p>
+                                        <p className="text-xs sm:text-sm text-slate-600">{rev.text}</p>
+                                        <p className="text-[11px] text-slate-400">{rev.date}</p>
                                     </div>
                                 ))}
                             </div>
-                        </section>
-                    )}
-                </main>
+                        )}
+                    </main>
+                </div>
             </div>
 
-            {/* Profile Customization Modal */}
+            {/* Profile & Theme Modal */}
             {isCustomizeModalOpen && (
-                <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4">
-                    <div className="bg-white rounded-3xl max-w-lg w-full shadow-2xl border border-slate-200 overflow-hidden">
-                        <div className="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="w-4 h-4 text-teal-400" />
-                                <h3 className="text-sm font-bold">Customize Restaurant Profile</h3>
-                            </div>
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+                    <form
+                        onSubmit={handleSaveProfile}
+                        className="w-full max-w-lg bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 space-y-4"
+                    >
+                        <div className="flex items-center justify-between">
+                            <h2 className="text-lg font-bold text-slate-900">
+                                Edit Profile & Accent Theme
+                            </h2>
                             <button
+                                type="button"
                                 onClick={() => setIsCustomizeModalOpen(false)}
-                                className="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white cursor-pointer"
+                                className="p-1.5 rounded-xl text-slate-400 hover:bg-slate-100"
                             >
                                 <X className="w-4 h-4" />
                             </button>
                         </div>
 
-                        <form onSubmit={handleSaveProfile} className="p-6 space-y-4">
+                        <div className="space-y-3 text-xs">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                    Business Name
+                                <label className="block font-semibold text-slate-700 mb-1">
+                                    Property Name
                                 </label>
                                 <input
                                     type="text"
-                                    required
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
-                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
+                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
                                 />
                             </div>
-
                             <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                <label className="block font-semibold text-slate-700 mb-1">
                                     Tagline
                                 </label>
                                 <input
                                     type="text"
-                                    required
                                     value={editTagline}
                                     onChange={(e) => setEditTagline(e.target.value)}
-                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
+                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
                                 />
                             </div>
-
-                            <div className="grid grid-cols-2 gap-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                                    <label className="block font-semibold text-slate-700 mb-1">
                                         Location
                                     </label>
                                     <input
                                         type="text"
-                                        required
                                         value={editLocation}
                                         onChange={(e) => setEditLocation(e.target.value)}
-                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
+                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                        Phone
+                                    <label className="block font-semibold text-slate-700 mb-1">
+                                        Contact
                                     </label>
                                     <input
                                         type="text"
-                                        required
                                         value={editContact}
                                         onChange={(e) => setEditContact(e.target.value)}
-                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
+                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
                                     />
                                 </div>
                             </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                        Hours
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={editHours}
-                                        onChange={(e) => setEditHours(e.target.value)}
-                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-xs font-semibold text-slate-700 mb-1">
-                                        Tags
-                                    </label>
-                                    <input
-                                        type="text"
-                                        required
-                                        value={editCuisines}
-                                        onChange={(e) => setEditCuisines(e.target.value)}
-                                        className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs"
-                                    />
-                                </div>
-                            </div>
-
                             <div>
-                                <label className="block text-xs font-semibold text-slate-700 mb-2">
-                                    Brand Theme
+                                <label className="block font-semibold text-slate-700 mb-1">
+                                    Operating Hours
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editHours}
+                                    onChange={(e) => setEditHours(e.target.value)}
+                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-semibold text-slate-700 mb-1">
+                                    Tags / Cuisines (comma separated)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editCuisines}
+                                    onChange={(e) => setEditCuisines(e.target.value)}
+                                    className="w-full px-3.5 py-2 rounded-xl border border-slate-200"
+                                />
+                            </div>
+                            <div>
+                                <label className="block font-semibold text-slate-700 mb-1.5">
+                                    Accent Theme
                                 </label>
                                 <div className="flex flex-wrap gap-2">
                                     {(Object.keys(ACCENT_THEMES) as AccentTheme[]).map((key) => {
-                                        const item = ACCENT_THEMES[key];
+                                        const t = ACCENT_THEMES[key];
+                                        const selected = editTheme === key;
                                         return (
                                             <button
                                                 key={key}
                                                 type="button"
                                                 onClick={() => setEditTheme(key)}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer ${
-                                                    editTheme === key
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer ${
+                                                    selected
                                                         ? 'border-slate-900 bg-slate-900 text-white'
-                                                        : 'border-slate-200 bg-slate-50 text-slate-700'
+                                                        : 'border-slate-200 text-slate-700'
                                                 }`}
                                             >
                                                 <span
-                                                    className={`w-3 h-3 rounded-full ${item.swatchClass}`}
-                                                />
-                                                {item.label}
+                                                    className={`w-3 h-3 rounded-full ${t.swatchClass} flex items-center justify-center`}
+                                                >
+                                                    {selected && <Check className="w-2 h-2 text-white" />}
+                                                </span>
+                                                <span>{t.label}</span>
                                             </button>
                                         );
                                     })}
                                 </div>
                             </div>
+                        </div>
 
-                            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsCustomizeModalOpen(false)}
-                                    className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold cursor-pointer"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    type="submit"
-                                    className={`${theme.bgClass} text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 cursor-pointer`}
-                                >
-                                    <Check className="w-3.5 h-3.5" /> Save
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setIsCustomizeModalOpen(false)}
+                                className="px-4 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 cursor-pointer"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className={`px-4 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold cursor-pointer`}
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             )}
-        </div>
+
+            {/* Branch Selector Modal */}
+            <SelectBranchModal
+                isOpen={isBranchModalOpen}
+                branches={branches}
+                currentBranchId={activeBranchId}
+                defaultBranchId={defaultBranchId}
+                onClose={() => setIsBranchModalOpen(false)}
+                onEnterBranch={handleEnterBranch}
+                onAddNewBranch={handleAddNewBranch}
+            />
+        </>
     );
 }

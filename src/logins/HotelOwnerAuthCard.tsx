@@ -146,7 +146,7 @@ export default function HotelOwnerAuthCard() {
                 >
                     <div className="absolute top-1/3 -left-20 w-64 h-64 bg-[#C48A5A]/15 rounded-full blur-3xl pointer-events-none" />
 
-                    <p className="text-xs text-[#E7D6C1]/70 tracking-widest uppercase font-medium">
+                    <p className="text-xs text-[#e4e1dd] tracking-widest uppercase font-medium">
                         {isRegister ? "Partner with CraveOS" : "Owner portal"}
                     </p>
 
@@ -160,11 +160,11 @@ export default function HotelOwnerAuthCard() {
                                 transition={{ duration: 0.3 }}
                                 className="space-y-4"
                             >
-                                <h1 className="text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                                <h1 className="text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight">
                                     {isRegister ? (
                                         <>
                                             List your hotel <br />
-                                            <span className="text-[#5E6B23]">in minutes</span>
+                                            <span className="text-[#ffffff]">in minutes</span>
                                         </>
                                     ) : (
                                         <>
@@ -173,7 +173,7 @@ export default function HotelOwnerAuthCard() {
                                         </>
                                     )}
                                 </h1>
-                                <p className="text-sm text-[#E7D6C1]/80 max-w-xs leading-relaxed">
+                                <p className="text-sm text-[#e4e1dd]/80 max-w-xs leading-relaxed">
                                     {isRegister
                                         ? "Create your owner account to manage bookings, rooms, staff and revenue in one place."
                                         : "Sign in to track bookings, manage rooms and see how your property is performing."}
@@ -182,9 +182,9 @@ export default function HotelOwnerAuthCard() {
                         </AnimatePresence>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs text-[#E7D6C1]/60 pt-6 border-t border-[#6B4A3A]/40">
-                        <span>© {new Date().getFullYear()} CraveOS Inc.</span>
-                        <div className="flex items-center gap-1.5 text-[#C48A5A]">
+                    <div className="flex items-center justify-between text-xs text-[#e4e1dd] pt-6 border-t border-[#6B4A3A]/40">
+                        <span>© {new Date().getFullYear()} Dresto</span>
+                        <div className="flex items-center gap-1.5 text-[#e4e1dd]">
                             <ShieldCheck className="w-4 h-4" />
                             <span>Secure 256-Bit</span>
                         </div>
@@ -201,7 +201,7 @@ export default function HotelOwnerAuthCard() {
                     {/* HEADER */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-[#C48A5A] flex items-center justify-center text-[#FAF6F0] font-bold text-sm shadow-md">
+                            <div className="w-8 h-8 rounded-full bg-[#1b7712] flex items-center justify-center text-[#FAF6F0] font-bold text-sm shadow-md">
                                 C
                             </div>
                             <span className="font-bold text-lg tracking-tight">CraveOS</span>
@@ -210,7 +210,7 @@ export default function HotelOwnerAuthCard() {
                         <button
                             type="button"
                             onClick={handleAuthSwitch}
-                            className="px-4 py-1.5 rounded-full bg-[#E7D6C1]/60 hover:bg-[#E7D6C1] text-xs font-semibold transition-colors"
+                            className="px-4 py-1.5 rounded-full bg-[#1b7712] hover:bg-[#a1c69f] text-xs text-white font-semibold transition-colors"
                         >
                             {isRegister ? "Sign In" : "Sign Up"}
                         </button>
@@ -269,7 +269,7 @@ export default function HotelOwnerAuthCard() {
                                                             required
                                                             minLength={2}
                                                             maxLength={100}
-                                                            placeholder="Aarav Sharma"
+                                                            placeholder="Name"
                                                             value={formData.owner_name}
                                                             onChange={handleChange}
                                                             className={inputClass}
@@ -288,7 +288,7 @@ export default function HotelOwnerAuthCard() {
                                                             required
                                                             minLength={2}
                                                             maxLength={120}
-                                                            placeholder="Sea View Residency"
+                                                            placeholder="Enter Hotel Name"
                                                             value={formData.hotel_name}
                                                             onChange={handleChange}
                                                             className={inputClass}
@@ -307,7 +307,7 @@ export default function HotelOwnerAuthCard() {
                                                             type="text"
                                                             name="registration_number"
                                                             required
-                                                            placeholder="REG-2026-001"
+                                                            placeholder="Enter your reg no"
                                                             value={formData.registration_number}
                                                             onChange={handleChange}
                                                             className={inputClass}
@@ -324,7 +324,7 @@ export default function HotelOwnerAuthCard() {
                                                             name="gst_number"
                                                             required
                                                             maxLength={15}
-                                                            placeholder="32AAAAA0000A1Z5"
+                                                            placeholder="Enter a valid gst number"
                                                             value={formData.gst_number}
                                                             onChange={handleChange}
                                                             className={inputClass}
@@ -351,7 +351,7 @@ export default function HotelOwnerAuthCard() {
                                                     name="email"
                                                     required
                                                     maxLength={254}
-                                                    placeholder="owner@hotel.com"
+                                                    placeholder="Enter a vaild email  "
                                                     value={formData.email}
                                                     onChange={handleChange}
                                                     className={inputClass}
@@ -369,7 +369,7 @@ export default function HotelOwnerAuthCard() {
                                                         type="tel"
                                                         name="phone"
                                                         required
-                                                        placeholder="9876543210"
+                                                        placeholder="Enter phone number"
                                                         value={formData.phone}
                                                         onChange={handleChange}
                                                         className={inputClass}
@@ -418,7 +418,7 @@ export default function HotelOwnerAuthCard() {
                                     <button
                                         type="submit"
                                         disabled={loading}
-                                        className="w-full py-3 px-6 rounded-full bg-gradient-to-r from-[#C48A5A] to-[#b37949] text-[#FAF6F0] font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#C48A5A]/25 hover:opacity-95 transition-all mt-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        className="w-full py-3 px-6 rounded-full bg-[#1b7712]  text-[#FAF6F0] font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-[#C48A5A]/25 hover:opacity-95 transition-all mt-3 disabled:opacity-60 disabled:cursor-not-allowed"
                                     >
                                         <span>
                                             {loading
@@ -436,10 +436,10 @@ export default function HotelOwnerAuthCard() {
 
                     {/* FOOTER */}
                     <div className="flex items-center justify-between text-xs text-[#6B4A3A] pt-4 border-t border-[#E7D6C1]">
-                        <Link to="/login" className="hover:text-[#2B1D17] hover:underline">
+                        {/* <Link to="/login" className="hover:text-[#2B1D17] hover:underline">
                             Are you a customer?
-                        </Link>
-                        <span>© {new Date().getFullYear()} CraveOS Inc.</span>
+                        </Link> */}
+                        <span>© {new Date().getFullYear()} Dresto</span>
                     </div>
                 </motion.div>
             </div>
