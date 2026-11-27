@@ -28,6 +28,7 @@ import {
 import SelectBranchModal from '../hotelcomponents/SelectBranchModal';
 import type { Branch } from '../hotelcomponents/SelectBranchModal';
 import { useRestaurantStore } from '../features/restuarant/restaurant.store';
+import AddRestaurantModal from '../hotelcomponents/AddRestaurantModal';
 // import { log } from 'console';
 
 type AccentTheme = 'teal' | 'amber' | 'emerald' | 'rose' | 'indigo';
@@ -440,15 +441,16 @@ export default function Dashboard() {
     const theme = ACCENT_THEMES[profile.accentTheme] || ACCENT_THEMES.teal;
     const activeBranch = branches.find((b) => b.id === activeBranchId) || branches[0];
 
+    const [isModalOpen, setisModalopen] = useState(false)
 
     ///
     // const restaurants=useRestaurantStore((s)=>s.restaurants);
-    const fetchRestaurants=useRestaurantStore((s)=>s.fetchRestaurants)
+    const fetchRestaurants = useRestaurantStore((s) => s.fetchRestaurants)
 
-    useEffect(()=>{
+    useEffect(() => {
         fetchRestaurants()
-        
-    },[fetchRestaurants])
+
+    }, [fetchRestaurants])
 
     useEffect(() => {
         const handleOutside = (e: globalThis.MouseEvent) => {
@@ -525,10 +527,10 @@ export default function Dashboard() {
             prev.map((c) =>
                 c.id === id
                     ? {
-                          ...c,
-                          status: 'Resolved',
-                          reply: c.reply || 'Resolved immediately by Duty Manager on floor.',
-                      }
+                        ...c,
+                        status: 'Resolved',
+                        reply: c.reply || 'Resolved immediately by Duty Manager on floor.',
+                    }
                     : c
             )
         );
@@ -695,9 +697,8 @@ export default function Dashboard() {
 
                 {/* Left Workspace Sidebar */}
                 <aside
-                    className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-950 text-white flex flex-col transition-transform duration-200 ${
-                        mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-                    }`}
+                    className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-slate-950 text-white flex flex-col transition-transform duration-200 ${mobileNavOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+                        }`}
                 >
                     <div className="h-16 px-5 flex items-center justify-between border-b border-slate-800/80">
                         <div className="flex items-center gap-2.5">
@@ -763,9 +764,8 @@ export default function Dashboard() {
                                                             )
                                                         )
                                                     }
-                                                    className={`p-3.5 text-xs cursor-pointer transition hover:bg-slate-50 ${
-                                                        n.unread ? 'bg-teal-50/30' : ''
-                                                    }`}
+                                                    className={`p-3.5 text-xs cursor-pointer transition hover:bg-slate-50 ${n.unread ? 'bg-teal-50/30' : ''
+                                                        }`}
                                                 >
                                                     <div className="flex justify-between font-semibold text-slate-900">
                                                         <span>{n.title}</span>
@@ -806,11 +806,10 @@ export default function Dashboard() {
                                         setActiveTab(item.id);
                                         setMobileNavOpen(false);
                                     }}
-                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                                        active
+                                    className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition cursor-pointer ${active
                                             ? `${theme.bgClass} text-white shadow-sm`
                                             : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                                    }`}
+                                        }`}
                                 >
                                     <span className="flex items-center gap-3">
                                         <Icon className="w-4 h-4" />
@@ -818,11 +817,10 @@ export default function Dashboard() {
                                     </span>
                                     {item.badge !== null && item.badge !== undefined && (
                                         <span
-                                            className={`px-2 py-0.5 rounded-full text-[10px] ${
-                                                active
+                                            className={`px-2 py-0.5 rounded-full text-[10px] ${active
                                                     ? 'bg-white/20 text-white'
                                                     : 'bg-slate-800 text-slate-300'
-                                            }`}
+                                                }`}
                                         >
                                             {item.badge}
                                         </span>
@@ -839,14 +837,12 @@ export default function Dashboard() {
                                 Storefront Status
                             </span>
                             <span
-                                className={`inline-flex items-center gap-1.5 text-[11px] font-bold ${
-                                    isBusinessOpen ? 'text-emerald-400' : 'text-rose-400'
-                                }`}
+                                className={`inline-flex items-center gap-1.5 text-[11px] font-bold ${isBusinessOpen ? 'text-emerald-400' : 'text-rose-400'
+                                    }`}
                             >
                                 <span
-                                    className={`w-2 h-2 rounded-full ${
-                                        isBusinessOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-                                    }`}
+                                    className={`w-2 h-2 rounded-full ${isBusinessOpen ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
+                                        }`}
                                 />
                                 {isBusinessOpen ? 'Open' : 'Closed'}
                             </span>
@@ -968,6 +964,12 @@ export default function Dashboard() {
                                                 <SlidersHorizontal className="w-3.5 h-3.5" />
                                                 <span>Edit Profile</span>
                                             </button>
+                                            <button
+                                                type='button'
+                                                onClick={() => setisModalopen(true)}
+                                                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl ${theme.bgClass} ${theme.hoverBgClass} text-white text-xs font-semibold transition cursor-pointer`}>
+                                                <span>add restaurent</span>
+                                            </button>
                                         </div>
                                     </div>
 
@@ -1056,11 +1058,10 @@ export default function Dashboard() {
                                                 key={status}
                                                 type="button"
                                                 onClick={() => setComplaintFilter(status)}
-                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${
-                                                    complaintFilter === status
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer ${complaintFilter === status
                                                         ? `${theme.bgClass} text-white`
                                                         : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                                                }`}
+                                                    }`}
                                             >
                                                 {status}
                                             </button>
@@ -1229,11 +1230,10 @@ export default function Dashboard() {
                                                                 )
                                                             )
                                                         }
-                                                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                                                            item.available
+                                                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold cursor-pointer ${item.available
                                                                 ? 'bg-emerald-50 text-emerald-700'
                                                                 : 'bg-rose-50 text-rose-700'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         {item.available ? 'Available' : 'Sold Out'}
                                                     </button>
@@ -1305,11 +1305,10 @@ export default function Dashboard() {
                                                 key={cat}
                                                 type="button"
                                                 onClick={() => setGalleryFilter(cat)}
-                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${
-                                                    galleryFilter === cat
+                                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer ${galleryFilter === cat
                                                         ? `${theme.bgClass} text-white`
                                                         : 'bg-white text-slate-600 border border-slate-200'
-                                                }`}
+                                                    }`}
                                             >
                                                 {cat}
                                             </button>
@@ -1494,11 +1493,10 @@ export default function Dashboard() {
                                                 key={key}
                                                 type="button"
                                                 onClick={() => setEditTheme(key)}
-                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer ${
-                                                    selected
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold cursor-pointer ${selected
                                                         ? 'border-slate-900 bg-slate-900 text-white'
                                                         : 'border-slate-200 text-slate-700'
-                                                }`}
+                                                    }`}
                                             >
                                                 <span
                                                     className={`w-3 h-3 rounded-full ${t.swatchClass} flex items-center justify-center`}
@@ -1532,6 +1530,12 @@ export default function Dashboard() {
                 </div>
             )}
 
+            {/* Add Restaurent Modal */}
+            <AddRestaurantModal
+                isOpen={isModalOpen}
+                onClose={() => setisModalopen(false)}
+            />
+
             {/* Branch Selector Modal */}
             <SelectBranchModal
                 isOpen={isBranchModalOpen}
@@ -1542,6 +1546,7 @@ export default function Dashboard() {
                 onEnterBranch={handleEnterBranch}
                 onAddNewBranch={handleAddNewBranch}
             />
+
         </>
     );
 }

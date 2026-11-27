@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { Restaurant } from "./restaurant.types";
-import { getRestaurents } from "./restaurant.api";
+import { addRestaurantAPI, getRestaurents, type CreateRestaurantPayload, } from "./restaurant.api";
 
 
 interface RestaurantState {
@@ -10,7 +10,8 @@ interface RestaurantState {
     error: string | null
 
     fetchRestaurants: () => Promise<void>;
-    setSelectedRestaurant: (restaurant: Restaurant) => void;
+    addRestaurant: (payload: CreateRestaurantPayload) => Promise<Restaurant>;
+    setSelectedRestaurant: (restaurant: Restaurant | null) => void;
     clearRestaurants: () => void;
 }
 
@@ -38,6 +39,23 @@ export const useRestaurantStore = create<RestaurantState>((set) => ({
                 error: error instanceof Error ? error.message : "Something went wrong"
             })
         }
+    },
+    addRestaurant:async(payload)=>{
+        set({loading:true,error:null});
+        try {
+            const created =await addRestaurantAPI(payload)
+            set((state)=>({
+                restaurants:[...state.restaurants,created],
+                loading:false
+            }));
+            return created
+            
+        } catch (error) {
+            const message=error instanceof Error ? error.message: "Failed to add restaurent"
+            set({loading:false,error:message})
+            throw error instanceof Error ? error : new Error(message)
+        }
+
     },
     setSelectedRestaurant: (restaurant) => {
         set({ selectedRestaurant: restaurant });

@@ -19,3 +19,9 @@ export interface RestaurantResponse {
     message:string;
     data:Restaurant[];
 }
+
+export interface SingleRestaurentInterface {
+    success:boolean;
+    message:string;
+    data:Restaurant;
+}
